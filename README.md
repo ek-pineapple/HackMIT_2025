@@ -1,6 +1,5 @@
 # HackMIT Project ��
 
-Hey team! This is our HackMIT project repo. Let's build something awesome together!
 
 ## Quick Setup
 
@@ -17,12 +16,6 @@ Hey team! This is our HackMIT project repo. Let's build something awesome togeth
 
 3. **Start coding!** 🎉
 
-## How We Work Together
-
-- **Always work on your own branch** (never push to main)
-- **Commit often** with simple messages like "added login button" or "fixed bug"
-- **Push your branch** and create a PR when ready
-- **Ask for help** if you're stuck - we're a team!
 
 ## Project Structure
 
@@ -38,19 +31,4 @@ HackMIT/
 
 *We'll decide this together as we go!*
 
-## Team
 
-- [Your name] - [Your role]
-- [Teammate 1] - [Their role] 
-- [Teammate 2] - [Their role]
-- [Teammate 3] - [Their role]
-
-## Getting Help
-
-- Slack/Discord: [Your chat link]
-- GitHub Issues: For bugs and feature requests
-- Just ask in chat for quick questions!
-
----
-
-**Let's hack! 🔥**
