@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyAI - AI-Powered Study Assistant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+        
+        /* Dynamic Particle Background */
+        .particle {
+            position: absolute;
+            background: linear-gradient(45deg, #3b82f6, #8b5cf6, #06b6d4);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.7; }
+            50% { transform: translateY(-20px) rotate(180deg); opacity: 1; }
+        }
+        
+        .particle:nth-child(odd) {
+            animation-delay: -2s;
+            animation-duration: 8s;
+        }
+        
+        .particle:nth-child(even) {
+            animation-delay: -4s;
+            animation-duration: 10s;
+        }
+        
+        /* Floating Geometric Shapes */
+        .floating-shape {
+            position: absolute;
+            opacity: 0.1;
+            animation: drift 15s linear infinite;
+        }
+        
+        @keyframes drift {
+            0% { transform: translateX(-100px) rotate(0deg); }
+            100% { transform: translateX(calc(100vw + 100px)) rotate(360deg); }
+        }
+        
+        .shape-1 { animation-delay: 0s; }
+        .shape-2 { animation-delay: -5s; }
+        .shape-3 { animation-delay: -10s; }
+        
+        /* Gradient Text */
+        .gradient-text {
+            background: linear-gradient(135deg, #1e40af, #7c3aed, #0891b2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        /* Glass Effect */
+        .glass-effect {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+        
+        /* Mature Button Styles */
+        .btn-primary {
+            background: linear-gradient(135deg, #1e40af, #3730a3);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #1d4ed8, #4338ca);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #374151, #4b5563);
+            border: 1px solid rgba(75, 85, 99, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, #4b5563, #6b7280);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(75, 85, 99, 0.3);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #059669, #047857);
+            border: 1px solid rgba(5, 150, 105, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-success:hover {
+            background: linear-gradient(135deg, #10b981, #059669);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(5, 150, 105, 0.3);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            border: 1px solid rgba(220, 38, 38, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-danger:hover {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(220, 38, 38, 0.3);
+        }
+        
+        /* Upload Area */
+        .upload-area {
+            border: 2px dashed rgba(59, 130, 246, 0.5);
+            transition: all 0.3s ease;
+        }
+        
+        .upload-area:hover {
+            border-color: rgba(59, 130, 246, 0.8);
+            background: rgba(59, 130, 246, 0.05);
+        }
+        
+        .upload-area.dragover {
+            border-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.1);
+        }
+        
+        /* Question Card */
+        .question-card {
+            background: linear-gradient(135deg, rgba(30, 64, 175, 0.1), rgba(124, 58, 237, 0.1));
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+        
+        /* Answer Recording */
+        .recording-pulse {
+            animation: recordingPulse 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes recordingPulse {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.1); opacity: 1; }
+        }
+        
+        /* Progress Bar */
+        .progress-bar {
+            background: linear-gradient(90deg, #1e40af, #7c3aed, #0891b2);
+            animation: progressGlow 2s ease-in-out infinite;
+        }
+        
+        @keyframes progressGlow {
+            0%, 100% { box-shadow: 0 0 5px rgba(59, 130, 246, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.8); }
+        }
+        
+        /* Fade In Animation */
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Floating Animation */
+        .floating {
+            animation: floating 3s ease-in-out infinite;
+        }
+        
+        @keyframes floating {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 min-h-screen relative">
+    <!-- Dynamic Particle Background -->
+    <div id="particles" class="fixed inset-0 overflow-hidden pointer-events-none"></div>
+    
+    <!-- Floating Geometric Shapes -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none">
+        <div class="floating-shape shape-1 w-20 h-20 bg-blue-500 rounded-lg transform rotate-45"></div>
+        <div class="floating-shape shape-2 w-16 h-16 bg-purple-500 rounded-full"></div>
+        <div class="floating-shape shape-3 w-24 h-24 bg-cyan-500 transform rotate-12"></div>
+    </div>
+
+    <div class="relative z-10 container mx-auto px-4 py-8">
+        <div class="max-w-6xl mx-auto">
+            <!-- Header -->
+            <div class="text-center mb-8">
+                <h1 class="text-6xl font-bold gradient-text mb-4 floating">
+                    🎓 StudyAI
+                </h1>
+                <p class="text-xl text-blue-200 mb-2">
+                    AI-Powered Study Assistant for Interactive Learning
+                </p>
+                <p class="text-sm text-blue-300">
+                    Upload notes • Answer questions • Get instant feedback • Master your subjects
+                </p>
+            </div>
+
+            <!-- Main Content -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Left Panel: Notes Upload & Study Session -->
+                <div class="space-y-6">
+                    <!-- Notes Upload Section -->
+                    <div class="glass-effect rounded-2xl p-6 fade-in">
+                        <h2 class="text-2xl font-semibold text-white mb-4 flex items-center">
+                            📚 Upload Study Materials
+                        </h2>
+                        
+                        <div id="uploadArea" class="upload-area rounded-xl p-8 text-center mb-4">
+                            <div class="text-6xl mb-4">📄</div>
+                            <p class="text-gray-300 mb-2">Drag & drop your notes here</p>
+                            <p class="text-sm text-gray-400">or click to browse files</p>
+                            <input type="file" id="fileInput" class="hidden" accept=".pdf,.txt,.doc,.docx" multiple>
+                        </div>
+                        
+                        <div id="uploadedFiles" class="space-y-2 hidden">
+                            <h3 class="text-lg font-medium text-white">Uploaded Files:</h3>
+                            <div id="fileList" class="space-y-2"></div>
+                        </div>
+                        
+                        <button id="startStudyBtn" class="btn-primary w-full py-3 px-6 rounded-xl font-semibold text-white disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                            🚀 Start Study Session
+                        </button>
+                    </div>
+
+                    <!-- Study Progress -->
+                    <div class="glass-effect rounded-2xl p-6 fade-in">
+                        <h3 class="text-xl font-semibold text-white mb-4">📊 Study Progress</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <div class="flex justify-between text-sm text-gray-300 mb-2">
+                                    <span>Questions Answered</span>
+                                    <span id="questionsAnswered">0/10</span>
+                                </div>
+                                <div class="w-full bg-gray-700 rounded-full h-2">
+                                    <div id="progressBar" class="progress-bar h-2 rounded-full" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4 text-center">
+                                <div class="bg-slate-800/50 rounded-lg p-3">
+                                    <div class="text-2xl font-bold text-green-400" id="correctAnswers">0</div>
+                                    <div class="text-sm text-gray-400">Correct</div>
+                                </div>
+                                <div class="bg-slate-800/50 rounded-lg p-3">
+                                    <div class="text-2xl font-bold text-blue-400" id="accuracy">0%</div>
+                                    <div class="text-sm text-gray-400">Accuracy</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Panel: AI Questions & Answers -->
+                <div class="space-y-6">
+                    <!-- Current Question -->
+                    <div id="questionSection" class="glass-effect rounded-2xl p-6 fade-in hidden">
+                        <h3 class="text-xl font-semibold text-white mb-4">🤖 AI Question</h3>
+                        <div class="question-card rounded-xl p-6 mb-6">
+                            <p id="currentQuestion" class="text-gray-200 text-lg leading-relaxed"></p>
+                        </div>
+                        
+                        <!-- Answer Recording -->
+                        <div class="text-center">
+                            <button id="recordAnswerBtn" class="btn-primary py-4 px-8 rounded-full text-xl font-semibold text-white recording-pulse">
+                                🎤 Record Your Answer
+                            </button>
+                            <p class="text-sm text-gray-400 mt-2">Press and hold to record your verbal answer</p>
+                        </div>
+                        
+                        <!-- Answer Status -->
+                        <div id="answerStatus" class="mt-4 text-center hidden">
+                            <div class="flex items-center justify-center space-x-2 text-cyan-400">
+                                <div class="w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></div>
+                                <div class="w-2 h-2 bg-cyan-400 rounded-full animate-pulse" style="animation-delay: 0.2s;"></div>
+                                <div class="w-2 h-2 bg-cyan-400 rounded-full animate-pulse" style="animation-delay: 0.4s;"></div>
+                                <span class="ml-2 text-sm">Processing your answer...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- AI Feedback -->
+                    <div id="feedbackSection" class="glass-effect rounded-2xl p-6 fade-in hidden">
+                        <h3 class="text-xl font-semibold text-white mb-4">💡 AI Feedback</h3>
+                        <div id="feedbackContent" class="space-y-4">
+                            <!-- Feedback will be populated here -->
+                        </div>
+                        
+                        <div class="flex space-x-3 mt-6">
+                            <button id="nextQuestionBtn" class="btn-primary flex-1 py-3 px-6 rounded-xl font-semibold text-white">
+                                ➡️ Next Question
+                            </button>
+                            <button id="followUpBtn" class="btn-secondary flex-1 py-3 px-6 rounded-xl font-semibold text-white hidden">
+                                🔄 Follow-up Questions
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Study Session Complete -->
+                    <div id="completeSection" class="glass-effect rounded-2xl p-6 fade-in hidden">
+                        <div class="text-center">
+                            <div class="text-6xl mb-4">🎉</div>
+                            <h3 class="text-2xl font-semibold text-white mb-4">Study Session Complete!</h3>
+                            <div class="bg-slate-800/50 rounded-xl p-6 mb-6">
+                                <div class="grid grid-cols-2 gap-4 text-center">
+                                    <div>
+                                        <div class="text-3xl font-bold text-green-400" id="finalScore">0/10</div>
+                                        <div class="text-sm text-gray-400">Final Score</div>
+                                    </div>
+                                    <div>
+                                        <div class="text-3xl font-bold text-blue-400" id="finalAccuracy">0%</div>
+                                        <div class="text-sm text-gray-400">Accuracy</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <button id="newSessionBtn" class="btn-success py-3 px-8 rounded-xl font-semibold text-white">
+                                🚀 Start New Session
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Study Session State
+        let studySession = {
+            questions: [],
+            currentQuestionIndex: 0,
+            answers: [],
+            scores: [],
+            correctAnswers: 0,
+            isRecording: false,
+            recognition: null,
+            mediaRecorder: null,
+            audioChunks: []
+        };
+
+        // Initialize Speech Recognition
+        function initSpeechRecognition() {
+            if ('webkitSpeechRecognition' in window) {
+                studySession.recognition = new webkitSpeechRecognition();
+            } else if ('SpeechRecognition' in window) {
+                studySession.recognition = new SpeechRecognition();
+            } else {
+                showNotification('Speech recognition not supported. Please use Chrome or Safari.', 'error');
+                return;
+            }
+
+            studySession.recognition.continuous = false;
+            studySession.recognition.interimResults = false;
+            studySession.recognition.lang = 'en-US';
+
+            studySession.recognition.onstart = function() {
+                studySession.isRecording = true;
+                updateRecordingUI(true);
+            };
+
+            studySession.recognition.onresult = function(event) {
+                const answer = event.results[0][0].transcript;
+                processAnswer(answer);
+            };
+
+            studySession.recognition.onerror = function(event) {
+                console.error('Speech recognition error:', event.error);
+                studySession.isRecording = false;
+                updateRecordingUI(false);
+                showNotification('Speech recognition error. Please try again.', 'error');
+            };
+
+            studySession.recognition.onend = function() {
+                studySession.isRecording = false;
+                updateRecordingUI(false);
+            };
+        }
+
+        // Create Dynamic Particles
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = 50;
+
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                
+                const size = Math.random() * 4 + 2;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // File Upload Handling with Backend Integration
+        function setupFileUpload() {
+            const uploadArea = document.getElementById('uploadArea');
+            const fileInput = document.getElementById('fileInput');
+            const uploadedFiles = document.getElementById('uploadedFiles');
+            const fileList = document.getElementById('fileList');
+            const startStudyBtn = document.getElementById('startStudyBtn');
+
+            uploadArea.addEventListener('click', () => fileInput.click());
+            uploadArea.addEventListener('dragover', handleDragOver);
+            uploadArea.addEventListener('dragleave', handleDragLeave);
+            uploadArea.addEventListener('drop', handleDrop);
+            fileInput.addEventListener('change', handleFileSelect);
+
+            function handleDragOver(e) {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            }
+
+            function handleDragLeave(e) {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+            }
+
+            function handleDrop(e) {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                handleFiles(files);
+            }
+
+            function handleFileSelect(e) {
+                const files = e.target.files;
+                handleFiles(files);
+            }
+
+            async function handleFiles(files) {
+                if (files.length > 0) {
+                    try {
+                        const formData = new FormData();
+                        Array.from(files).forEach(file => {
+                            formData.append('files', file);
+                        });
+
+                        const response = await fetch('/upload', {
+                            method: 'POST',
+                            body: formData
+                        });
+
+                        const result = await response.json();
+
+                        if (result.success) {
+                            uploadedFiles.classList.remove('hidden');
+                            fileList.innerHTML = '';
+                            
+                            result.files.forEach(file => {
+                                const fileItem = document.createElement('div');
+                                fileItem.className = 'flex items-center justify-between bg-slate-800/50 rounded-lg p-3';
+                                fileItem.innerHTML = `
+                                    <div class="flex items-center space-x-3">
+                                        <span class="text-2xl">📄</span>
+                                        <div>
+                                            <div class="text-white font-medium">${file.filename}</div>
+                                            <div class="text-sm text-gray-400">${(file.size / 1024).toFixed(1)} KB</div>
+                                        </div>
+                                    </div>
+                                    <button onclick="removeFile(this)" class="btn-danger px-3 py-1 rounded-lg text-sm">
+                                        🗑️
+                                    </button>
+                                `;
+                                fileList.appendChild(fileItem);
+                            });
+                            
+                            startStudyBtn.disabled = false;
+                            showNotification('Files uploaded successfully! Ready to start studying.', 'success');
+                        } else {
+                            showNotification('Error uploading files: ' + result.message, 'error');
+                        }
+                    } catch (error) {
+                        console.error('Upload error:', error);
+                        showNotification('Error uploading files. Please try again.', 'error');
+                    }
+                }
+            }
+        }
+
+        function removeFile(button) {
+            button.parentElement.remove();
+            const remainingFiles = document.getElementById('fileList').children.length;
+            if (remainingFiles === 0) {
+                document.getElementById('uploadedFiles').classList.add('hidden');
+                document.getElementById('startStudyBtn').disabled = true;
+            }
+        }
+
+        // Start Study Session with Backend Integration
+        async function startStudySession() {
+            try {
+                // Generate questions using backend
+                const response = await fetch('/generate_questions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        content: 'Study material uploaded by user'
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    studySession.questions = result.questions;
+                    studySession.currentQuestionIndex = 0;
+                    studySession.answers = [];
+                    studySession.scores = [];
+                    studySession.correctAnswers = 0;
+                    
+                    showQuestion();
+                    updateProgress();
+                    showNotification('Study session started! Answer the questions verbally.', 'success');
+                } else {
+                    showNotification('Error generating questions: ' + result.message, 'error');
+                }
+            } catch (error) {
+                console.error('Error starting study session:', error);
+                showNotification('Error starting study session. Please try again.', 'error');
+            }
+        }
+
+        function showQuestion() {
+            const questionSection = document.getElementById('questionSection');
+            const currentQuestion = document.getElementById('currentQuestion');
+            const feedbackSection = document.getElementById('feedbackSection');
+            const completeSection = document.getElementById('completeSection');
+            
+            questionSection.classList.remove('hidden');
+            feedbackSection.classList.add('hidden');
+            completeSection.classList.add('hidden');
+            
+            currentQuestion.textContent = studySession.questions[studySession.currentQuestionIndex];
+        }
+
+        function updateRecordingUI(recording) {
+            const recordBtn = document.getElementById('recordAnswerBtn');
+            const answerStatus = document.getElementById('answerStatus');
+            
+            if (recording) {
+                recordBtn.textContent = '🔴 Recording... Release to Stop';
+                recordBtn.classList.add('recording-pulse');
+                answerStatus.classList.remove('hidden');
+            } else {
+                recordBtn.textContent = '🎤 Record Your Answer';
+                recordBtn.classList.remove('recording-pulse');
+                answerStatus.classList.add('hidden');
+            }
+        }
+
+        // Process Answer with Backend Integration
+        async function processAnswer(answer) {
+            try {
+                const response = await fetch('/grade_answer', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        question: studySession.questions[studySession.currentQuestionIndex],
+                        answer: answer
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    studySession.answers.push({
+                        question: studySession.questions[studySession.currentQuestionIndex],
+                        answer: answer,
+                        score: result.score,
+                        isCorrect: result.isCorrect
+                    });
+                    
+                    studySession.scores.push(result.score);
+                    
+                    if (result.isCorrect) {
+                        studySession.correctAnswers++;
+                    }
+                    
+                    showFeedback(answer, result.score, result.isCorrect, result.feedback);
+                    updateProgress();
+                } else {
+                    showNotification('Error grading answer: ' + result.message, 'error');
+                }
+            } catch (error) {
+                console.error('Error processing answer:', error);
+                showNotification('Error processing answer. Please try again.', 'error');
+            }
+        }
+
+        function showFeedback(answer, score, isCorrect, feedback) {
+            const questionSection = document.getElementById('questionSection');
+            const feedbackSection = document.getElementById('feedbackSection');
+            const feedbackContent = document.getElementById('feedbackContent');
+            const followUpBtn = document.getElementById('followUpBtn');
+            
+            questionSection.classList.add('hidden');
+            feedbackSection.classList.remove('hidden');
+            
+            const feedbackHTML = `
+                <div class="bg-slate-800/50 rounded-xl p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h4 class="text-lg font-semibold text-white">Your Answer:</h4>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-2xl">${isCorrect ? '✅' : '⚠️'}</span>
+                            <span class="text-xl font-bold ${isCorrect ? 'text-green-400' : 'text-yellow-400'}">${score}/10</span>
+                        </div>
+                    </div>
+                    <p class="text-gray-300 mb-4">"${answer}"</p>
+                    <div class="bg-slate-700/50 rounded-lg p-4">
+                        <h5 class="font-semibold text-white mb-2">AI Feedback:</h5>
+                        <p class="text-gray-300">${feedback}</p>
+                    </div>
+                </div>
+            `;
+            
+            feedbackContent.innerHTML = feedbackHTML;
+            
+            if (!isCorrect && score < 7) {
+                followUpBtn.classList.remove('hidden');
+            } else {
+                followUpBtn.classList.add('hidden');
+            }
+        }
+
+        function nextQuestion() {
+            studySession.currentQuestionIndex++;
+            
+            if (studySession.currentQuestionIndex >= studySession.questions.length) {
+                showComplete();
+            } else {
+                showQuestion();
+            }
+        }
+
+        async function showComplete() {
+            const questionSection = document.getElementById('questionSection');
+            const feedbackSection = document.getElementById('feedbackSection');
+            const completeSection = document.getElementById('completeSection');
+            const finalScore = document.getElementById('finalScore');
+            const finalAccuracy = document.getElementById('finalAccuracy');
+            
+            questionSection.classList.add('hidden');
+            feedbackSection.classList.add('hidden');
+            completeSection.classList.remove('hidden');
+            
+            const accuracy = Math.round((studySession.correctAnswers / studySession.questions.length) * 100);
+            const totalScore = studySession.scores.reduce((sum, score) => sum + score, 0);
+            
+            finalScore.textContent = `${totalScore}/${studySession.questions.length * 10}`;
+            finalAccuracy.textContent = `${accuracy}%`;
+            
+            // Save session to backend
+            try {
+                await fetch('/save_session', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        questions: studySession.questions,
+                        answers: studySession.answers,
+                        scores: studySession.scores,
+                        total_score: totalScore,
+                        accuracy: accuracy
+                    })
+                });
+            } catch (error) {
+                console.error('Error saving session:', error);
+            }
+            
+            showNotification('Study session completed! Great job!', 'success');
+        }
+
+        function updateProgress() {
+            const questionsAnswered = document.getElementById('questionsAnswered');
+            const progressBar = document.getElementById('progressBar');
+            const correctAnswers = document.getElementById('correctAnswers');
+            const accuracy = document.getElementById('accuracy');
+            
+            const progress = (studySession.currentQuestionIndex / studySession.questions.length) * 100;
+            const currentAccuracy = studySession.currentQuestionIndex > 0 ? 
+                Math.round((studySession.correctAnswers / studySession.currentQuestionIndex) * 100) : 0;
+            
+            questionsAnswered.textContent = `${studySession.currentQuestionIndex}/${studySession.questions.length}`;
+            progressBar.style.width = `${progress}%`;
+            correctAnswers.textContent = studySession.correctAnswers;
+            accuracy.textContent = `${currentAccuracy}%`;
+        }
+
+        function showNotification(message, type = 'success') {
+            const colors = {
+                success: 'from-green-600 to-emerald-600',
+                error: 'from-red-600 to-pink-600',
+                info: 'from-blue-600 to-cyan-600'
+            };
+            
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 bg-gradient-to-r ${colors[type]} text-white px-6 py-3 rounded-lg shadow-2xl z-50 transform translate-x-full transition-transform duration-300`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.classList.remove('translate-x-full');
+            }, 100);
+
+            setTimeout(() => {
+                notification.classList.add('translate-x-full');
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+
+        // Event Listeners
+        document.getElementById('startStudyBtn').addEventListener('click', startStudySession);
+        document.getElementById('recordAnswerBtn').addEventListener('mousedown', () => {
+            if (studySession.recognition) {
+                studySession.recognition.start();
+            }
+        });
+        document.getElementById('recordAnswerBtn').addEventListener('mouseup', () => {
+            if (studySession.recognition && studySession.isRecording) {
+                studySession.recognition.stop();
+            }
+        });
+        document.getElementById('nextQuestionBtn').addEventListener('click', nextQuestion);
+        document.getElementById('newSessionBtn').addEventListener('click', () => {
+            location.reload();
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            createParticles();
+            setupFileUpload();
+            initSpeechRecognition();
+        });
+    </script>
+</body>
+</html>
