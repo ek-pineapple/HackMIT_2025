@@ -339,9 +339,12 @@
             questions: [],
             currentQuestionIndex: 0,
             answers: [],
+            scores: [],
             correctAnswers: 0,
             isRecording: false,
-            recognition: null
+            recognition: null,
+            mediaRecorder: null,
+            audioChunks: []
         };
 
         // Initialize Speech Recognition
@@ -402,7 +405,7 @@
             }
         }
 
-        // File Upload Handling
+        // File Upload Handling with Backend Integration
         function setupFileUpload() {
             const uploadArea = document.getElementById('uploadArea');
             const fileInput = document.getElementById('fileInput');
@@ -438,31 +441,52 @@
                 handleFiles(files);
             }
 
-            function handleFiles(files) {
+            async function handleFiles(files) {
                 if (files.length > 0) {
-                    uploadedFiles.classList.remove('hidden');
-                    fileList.innerHTML = '';
-                    
-                    Array.from(files).forEach(file => {
-                        const fileItem = document.createElement('div');
-                        fileItem.className = 'flex items-center justify-between bg-slate-800/50 rounded-lg p-3';
-                        fileItem.innerHTML = `
-                            <div class="flex items-center space-x-3">
-                                <span class="text-2xl">📄</span>
-                                <div>
-                                    <div class="text-white font-medium">${file.name}</div>
-                                    <div class="text-sm text-gray-400">${(file.size / 1024).toFixed(1)} KB</div>
-                                </div>
-                            </div>
-                            <button onclick="removeFile(this)" class="btn-danger px-3 py-1 rounded-lg text-sm">
-                                🗑️
-                            </button>
-                        `;
-                        fileList.appendChild(fileItem);
-                    });
-                    
-                    startStudyBtn.disabled = false;
-                    showNotification('Files uploaded successfully! Ready to start studying.', 'success');
+                    try {
+                        const formData = new FormData();
+                        Array.from(files).forEach(file => {
+                            formData.append('files', file);
+                        });
+
+                        const response = await fetch('/upload', {
+                            method: 'POST',
+                            body: formData
+                        });
+
+                        const result = await response.json();
+
+                        if (result.success) {
+                            uploadedFiles.classList.remove('hidden');
+                            fileList.innerHTML = '';
+                            
+                            result.files.forEach(file => {
+                                const fileItem = document.createElement('div');
+                                fileItem.className = 'flex items-center justify-between bg-slate-800/50 rounded-lg p-3';
+                                fileItem.innerHTML = `
+                                    <div class="flex items-center space-x-3">
+                                        <span class="text-2xl">📄</span>
+                                        <div>
+                                            <div class="text-white font-medium">${file.filename}</div>
+                                            <div class="text-sm text-gray-400">${(file.size / 1024).toFixed(1)} KB</div>
+                                        </div>
+                                    </div>
+                                    <button onclick="removeFile(this)" class="btn-danger px-3 py-1 rounded-lg text-sm">
+                                        🗑️
+                                    </button>
+                                `;
+                                fileList.appendChild(fileItem);
+                            });
+                            
+                            startStudyBtn.disabled = false;
+                            showNotification('Files uploaded successfully! Ready to start studying.', 'success');
+                        } else {
+                            showNotification('Error uploading files: ' + result.message, 'error');
+                        }
+                    } catch (error) {
+                        console.error('Upload error:', error);
+                        showNotification('Error uploading files. Please try again.', 'error');
+                    }
                 }
             }
         }
@@ -476,29 +500,39 @@
             }
         }
 
-        // Start Study Session
-        function startStudySession() {
-            // Generate sample questions based on uploaded content
-            studySession.questions = [
-                "Explain the main concept discussed in your notes.",
-                "What are the key points you need to remember?",
-                "How would you apply this knowledge in a real-world scenario?",
-                "What are the potential challenges or limitations mentioned?",
-                "Summarize the most important takeaway from your study material.",
-                "What questions do you still have about this topic?",
-                "How does this connect to other concepts you've learned?",
-                "What practical examples can you think of?",
-                "What would you like to explore further about this topic?",
-                "How confident do you feel about this material?"
-            ];
-            
-            studySession.currentQuestionIndex = 0;
-            studySession.answers = [];
-            studySession.correctAnswers = 0;
-            
-            showQuestion();
-            updateProgress();
-            showNotification('Study session started! Answer the questions verbally.', 'success');
+        // Start Study Session with Backend Integration
+        async function startStudySession() {
+            try {
+                // Generate questions using backend
+                const response = await fetch('/generate_questions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        content: 'Study material uploaded by user'
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    studySession.questions = result.questions;
+                    studySession.currentQuestionIndex = 0;
+                    studySession.answers = [];
+                    studySession.scores = [];
+                    studySession.correctAnswers = 0;
+                    
+                    showQuestion();
+                    updateProgress();
+                    showNotification('Study session started! Answer the questions verbally.', 'success');
+                } else {
+                    showNotification('Error generating questions: ' + result.message, 'error');
+                }
+            } catch (error) {
+                console.error('Error starting study session:', error);
+                showNotification('Error starting study session. Please try again.', 'error');
+            }
         }
 
         function showQuestion() {
@@ -529,27 +563,48 @@
             }
         }
 
-        function processAnswer(answer) {
-            // Simulate AI grading (replace with actual AI API)
-            const isCorrect = Math.random() > 0.3; // 70% chance of being correct
-            const score = isCorrect ? Math.floor(Math.random() * 3) + 7 : Math.floor(Math.random() * 6) + 1;
-            
-            studySession.answers.push({
-                question: studySession.questions[studySession.currentQuestionIndex],
-                answer: answer,
-                score: score,
-                isCorrect: isCorrect
-            });
-            
-            if (isCorrect) {
-                studySession.correctAnswers++;
+        // Process Answer with Backend Integration
+        async function processAnswer(answer) {
+            try {
+                const response = await fetch('/grade_answer', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        question: studySession.questions[studySession.currentQuestionIndex],
+                        answer: answer
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    studySession.answers.push({
+                        question: studySession.questions[studySession.currentQuestionIndex],
+                        answer: answer,
+                        score: result.score,
+                        isCorrect: result.isCorrect
+                    });
+                    
+                    studySession.scores.push(result.score);
+                    
+                    if (result.isCorrect) {
+                        studySession.correctAnswers++;
+                    }
+                    
+                    showFeedback(answer, result.score, result.isCorrect, result.feedback);
+                    updateProgress();
+                } else {
+                    showNotification('Error grading answer: ' + result.message, 'error');
+                }
+            } catch (error) {
+                console.error('Error processing answer:', error);
+                showNotification('Error processing answer. Please try again.', 'error');
             }
-            
-            showFeedback(answer, score, isCorrect);
-            updateProgress();
         }
 
-        function showFeedback(answer, score, isCorrect) {
+        function showFeedback(answer, score, isCorrect, feedback) {
             const questionSection = document.getElementById('questionSection');
             const feedbackSection = document.getElementById('feedbackSection');
             const feedbackContent = document.getElementById('feedbackContent');
@@ -570,12 +625,7 @@
                     <p class="text-gray-300 mb-4">"${answer}"</p>
                     <div class="bg-slate-700/50 rounded-lg p-4">
                         <h5 class="font-semibold text-white mb-2">AI Feedback:</h5>
-                        <p class="text-gray-300">
-                            ${isCorrect ? 
-                                'Great answer! You demonstrated a solid understanding of the concept. Keep up the excellent work!' :
-                                'Good attempt! Consider expanding on the key points and providing more specific examples to strengthen your answer.'
-                            }
-                        </p>
+                        <p class="text-gray-300">${feedback}</p>
                     </div>
                 </div>
             `;
@@ -599,7 +649,7 @@
             }
         }
 
-        function showComplete() {
+        async function showComplete() {
             const questionSection = document.getElementById('questionSection');
             const feedbackSection = document.getElementById('feedbackSection');
             const completeSection = document.getElementById('completeSection');
@@ -611,8 +661,29 @@
             completeSection.classList.remove('hidden');
             
             const accuracy = Math.round((studySession.correctAnswers / studySession.questions.length) * 100);
-            finalScore.textContent = `${studySession.correctAnswers}/${studySession.questions.length}`;
+            const totalScore = studySession.scores.reduce((sum, score) => sum + score, 0);
+            
+            finalScore.textContent = `${totalScore}/${studySession.questions.length * 10}`;
             finalAccuracy.textContent = `${accuracy}%`;
+            
+            // Save session to backend
+            try {
+                await fetch('/save_session', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        questions: studySession.questions,
+                        answers: studySession.answers,
+                        scores: studySession.scores,
+                        total_score: totalScore,
+                        accuracy: accuracy
+                    })
+                });
+            } catch (error) {
+                console.error('Error saving session:', error);
+            }
             
             showNotification('Study session completed! Great job!', 'success');
         }
