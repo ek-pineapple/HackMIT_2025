@@ -3,8 +3,10 @@ import json
 from datetime import datetime
 import os
 import tempfile
-import random
-import requests
+from dotenv import load_dotenv
+import anthropic
+
+load_dotenv()
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "studyai-secret-key"
@@ -13,218 +15,193 @@ app.config["SECRET_KEY"] = "studyai-secret-key"
 study_sessions = []
 uploaded_files = []
 
-def read_file_content(file_path):
-    """Read file content as string"""
+ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
+
+llm_client = None
+llm_available = False
+
+if ANTHROPIC_API_KEY:
     try:
-        with open(file_path, "r", encoding="utf-8") as file:
+        llm_client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
+        llm_available = True
+        print("🤖 AI Integration: ENABLED (Anthropic Claude AI)")
+    except Exception as e:
+        print(f"⚠️ LLM not available: {e}")
+        print("⚠️ LLM Integration: DISABLED (Fallback mode)")
+else:
+    print("⚠️ ANTHROPIC_API_KEY not found. LLM Integration: DISABLED (Fallback mode)")
+
+def read_file_content(file_path):
+    """Read file content with proper encoding handling"""
+    try:
+        with open(file_path, 'r', encoding='utf-8') as file:
             return file.read()
+    except UnicodeDecodeError:
+        try:
+            with open(file_path, 'r', encoding='latin-1') as file:
+                return file.read()
+        except Exception as e:
+            return f"Error reading file: {e}"
     except Exception as e:
         return f"Error reading file: {e}"
-
-def call_anthropic_api(prompt, api_key=None):
-    """Call Anthropic API directly using requests"""
-    if not api_key:
-        api_key = "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"
-    
-    headers = {
-        'x-api-key': api_key,
-        'content-type': 'application/json',
-        'anthropic-version': '2023-06-01'
-    }
-    
-    # Try different model names that might be available
-    models_to_try = [
-        'claude-3-5-sonnet-20241022',
-        'claude-3-sonnet-20240229',
-        'claude-3-haiku-20240307',
-        'claude-instant-1.2',
-        'claude-2.1',
-        'claude-2.0'
-    ]
-    
-    for model in models_to_try:
-        data = {
-            'model': model,
-            'max_tokens': 1024,
-            'messages': [{'role': 'user', 'content': prompt}]
-        }
-        
-        try:
-            response = requests.post('https://api.anthropic.com/v1/messages', 
-                                   headers=headers, json=data, timeout=30)
-            
-            if response.status_code == 200:
-                result = response.json()
-                return {
-                    'success': True,
-                    'content': result['content'][0]['text'],
-                    'model': model
-                }
-            elif response.status_code == 404:
-                continue  # Try next model
-            else:
-                print(f"API Error for {model}: {response.status_code} - {response.text}")
-                continue
-                
-        except Exception as e:
-            print(f"Request Error for {model}: {e}")
-            continue
-    
-    return {'success': False, 'error': 'No working model found'}
 
 def generate_questions_with_ai(content):
     """Generate questions using Anthropic API or fallback"""
     try:
-        prompt = f"Based on the following study material, generate 5 thoughtful questions that test understanding and application. Return only a Python list of strings format:\n\n{content[:2000]}"
+        prompt = f"""Based on the following study material, generate exactly 5 thoughtful questions that test understanding and application.
+
+IMPORTANT: Return ONLY a JSON array of strings, no other text, no explanations, no prefixes.
+
+Study material:
+{content[:2000]}
+
+Return format:
+["Question 1", "Question 2", "Question 3", "Question 4", "Question 5"]"""
         
-        result = call_anthropic_api(prompt)
-        
-        if result['success']:
-            output = result['content'].strip()
+        if llm_available and llm_client:
+            message = llm_client.messages.create(
+                model="claude-3-sonnet-20240229",
+                max_tokens=1024,
+                messages=[{"role": "user", "content": prompt}]
+            )
+            output = message.content[0].text.strip()
             print(f"LLM Response: {output}")
             
-            # Try to parse as Python list
+            # Try to parse as JSON array
             try:
-                questions = eval(output)
-                if isinstance(questions, list):
-                    return questions
-            except:
+                questions = json.loads(output)
+                if isinstance(questions, list) and len(questions) >= 5:
+                    return questions[:5]
+            except json.JSONDecodeError:
                 pass
             
-            # Fallback: split by lines and clean up
-            questions = [q.strip() for q in output.split('\n') if q.strip()]
-            return questions[:5]  # Limit to 5 questions
+            # Fallback: try to extract questions from text
+            lines = [line.strip() for line in output.split('\n') if line.strip()]
+            questions = []
+            for line in lines:
+                if line.startswith('"') and line.endswith('"'):
+                    questions.append(line[1:-1])
+                elif '?' in line and len(line) > 10:
+                    questions.append(line)
+            return questions[:5] if questions else None
         else:
-            print(f"API failed: {result.get('error', 'Unknown error')}")
             return None
-        
     except Exception as e:
         print(f"Error generating questions with AI: {e}")
+        return None
+
+def generate_followup_questions(question, answer, score, content=""):
+    """Generate follow-up questions based on the answer quality"""
+    try:
+        if score >= 8:
+            # Good answer - generate deeper questions
+            prompt = f"""The student gave a good answer (score: {score}/10) to this question: "{question}"
+
+Generate 3 follow-up questions that test deeper understanding and application. Return ONLY a JSON array of strings.
+
+Study material context: {content[:1000]}
+
+Return format: ["Follow-up 1", "Follow-up 2", "Follow-up 3"]"""
+        else:
+            # Poor answer - generate clarifying questions
+            prompt = f"""The student gave a poor answer (score: {score}/10) to this question: "{question}"
+
+Student's answer: "{answer}"
+
+Generate 3 follow-up questions that help clarify the concept and test basic understanding. Return ONLY a JSON array of strings.
+
+Study material context: {content[:1000]}
+
+Return format: ["Follow-up 1", "Follow-up 2", "Follow-up 3"]"""
+        
+        if llm_available and llm_client:
+            message = llm_client.messages.create(
+                model="claude-3-sonnet-20240229",
+                max_tokens=512,
+                messages=[{"role": "user", "content": prompt}]
+            )
+            output = message.content[0].text.strip()
+            print(f"Follow-up LLM Response: {output}")
+            
+            try:
+                questions = json.loads(output)
+                if isinstance(questions, list):
+                    return questions[:3]
+            except json.JSONDecodeError:
+                pass
+            
+            # Fallback parsing
+            lines = [line.strip() for line in output.split('\n') if line.strip()]
+            questions = []
+            for line in lines:
+                if line.startswith('"') and line.endswith('"'):
+                    questions.append(line[1:-1])
+                elif '?' in line and len(line) > 10:
+                    questions.append(line)
+            return questions[:3] if questions else None
+        else:
+            return None
+    except Exception as e:
+        print(f"Error generating follow-up questions: {e}")
         return None
 
 def grade_answer_with_ai(question, answer, content=""):
     """Grade answer using Anthropic API or fallback"""
     try:
-        prompt = f"""
-        Question: {question}
-        Student Answer: {answer}
+        prompt = f"""Grade this student's answer on a scale of 1-10 and provide feedback.
+
+Question: {question}
+Student Answer: {answer}
+Study Material Context: {content[:1000]}
+
+Return ONLY a JSON object with this exact format:
+{{
+    "score": <number between 1-10>,
+    "feedback": "<detailed feedback>",
+    "suggestions": "<improvement suggestions>"
+}}"""
         
-        Please grade this answer on a scale of 1-10 and provide feedback. Consider:
-        - Accuracy of the answer
-        - Depth of understanding
-        - Use of examples
-        - Clarity of explanation
-        
-        Return your response in this exact JSON format:
-        {{
-            "score": <number between 1-10>,
-            "feedback": "<detailed feedback>",
-            "suggestions": "<specific suggestions for improvement>"
-        }}
-        """
-        
-        result = call_anthropic_api(prompt)
-        
-        if result['success']:
-            output = result['content'].strip()
-            print(f"LLM Grading Response: {output}")
+        if llm_available and llm_client:
+            message = llm_client.messages.create(
+                model="claude-3-sonnet-20240229",
+                max_tokens=512,
+                messages=[{"role": "user", "content": prompt}]
+            )
+            output = message.content[0].text.strip()
+            print(f"Grading LLM Response: {output}")
             
-            # Try to parse JSON response
             try:
-                grading_result = json.loads(output)
-                return grading_result
-            except:
-                # Fallback parsing
-                return {
-                    "score": 7,
-                    "feedback": output,
-                    "suggestions": "Consider providing more specific examples and details."
-                }
-        else:
-            print(f"API failed: {result.get('error', 'Unknown error')}")
-            return None
+                result = json.loads(output)
+                if isinstance(result, dict) and 'score' in result:
+                    return result
+            except json.JSONDecodeError:
+                pass
         
+        # Fallback grading
+        return simulate_ai_grading(question, answer)
     except Exception as e:
         print(f"Error grading with AI: {e}")
-        return None
+        return simulate_ai_grading(question, answer)
 
-def generate_fallback_questions(content):
-    """Generate smart fallback questions based on content analysis"""
-    content_lower = content.lower()
-    
-    # Biology-related questions
-    if any(word in content_lower for word in ['cell', 'biology', 'organism', 'dna', 'protein']):
-        return [
-            "What is the fundamental unit of life and why is it important?",
-            "How do cells maintain their structure and function?",
-            "What are the key differences between prokaryotic and eukaryotic cells?",
-            "How do cells communicate with each other?",
-            "What role do organelles play in cellular function?"
-        ]
-    # Technology-related questions
-    elif any(word in content_lower for word in ['code', 'programming', 'software', 'algorithm', 'data']):
-        return [
-            "What are the key principles of good software design?",
-            "How would you optimize this algorithm for better performance?",
-            "What are the potential security implications of this approach?",
-            "How would you test this code to ensure reliability?",
-            "What are the trade-offs between different implementation approaches?"
-        ]
-    # General academic questions
-    else:
-        return [
-            "What are the main concepts discussed in this material?",
-            "How would you explain this topic to someone unfamiliar with it?",
-            "What are the practical applications of this knowledge?",
-            "What questions do you still have about this topic?",
-            "How does this connect to other concepts you've learned?"
-        ]
-
-def grade_answer_fallback(question, answer, content=""):
+def simulate_ai_grading(question, answer):
     """Fallback grading system"""
-    answer_lower = answer.lower()
+    score = 7  # Default score
+    feedback = "Good attempt! Your answer shows understanding of the topic."
+    suggestions = "Try to provide more specific examples and details."
     
-    # Base score
-    score = 5
-    
-    # Length-based scoring
-    word_count = len(answer.split())
-    if word_count > 50:
-        score += 2
-    elif word_count > 20:
-        score += 1
-    
-    # Quality indicators
-    quality_indicators = [
-        'because', 'therefore', 'however', 'example', 'specifically', 
-        'in other words', 'for instance', 'moreover', 'furthermore',
-        'analysis', 'explanation', 'understanding', 'concept'
-    ]
-    
-    quality_count = sum(1 for indicator in quality_indicators if indicator in answer_lower)
-    score += min(quality_count, 3)
-    
-    # Technical depth
-    if any(word in answer_lower for word in ['technical', 'implementation', 'algorithm', 'structure']):
-        score += 1
-    
-    # Add some randomness for realism
-    score += random.randint(-1, 2)
-    score = max(1, min(10, score))
-    
-    # Generate feedback based on score
-    if score >= 9:
-        feedback = "Outstanding answer! You demonstrated exceptional understanding with clear explanations, specific examples, and insightful analysis."
-        suggestions = "Excellent work! Consider exploring related advanced topics to deepen your knowledge further."
-    elif score >= 7:
-        feedback = "Very good answer! You showed solid understanding of the concepts with good explanations and examples."
-        suggestions = "Great job! Try to add more specific examples or case studies to strengthen your response."
-    elif score >= 5:
-        feedback = "Good answer! You covered the main points but could benefit from more detailed explanations and examples."
-        suggestions = "Good foundation! Consider providing more specific examples and explaining the 'why' behind your points."
-    else:
-        feedback = "Your answer needs improvement. Try to provide more specific details, examples, and explanations."
-        suggestions = "Focus on providing more detailed explanations, specific examples, and connecting concepts together."
+    # Simple keyword-based scoring
+    if len(answer) < 20:
+        score = 3
+        feedback = "Your answer is too brief. Please provide more detail."
+        suggestions = "Expand your answer with specific examples and explanations."
+    elif any(word in answer.lower() for word in ['i don\'t know', 'not sure', 'maybe']):
+        score = 4
+        feedback = "It's okay to be uncertain, but try to apply what you know."
+        suggestions = "Use the study material to form a more confident answer."
+    elif len(answer) > 100:
+        score = 8
+        feedback = "Excellent detailed answer! You've shown good understanding."
+        suggestions = "Keep up the great work with detailed explanations!"
     
     return {
         "score": score,
@@ -232,46 +209,59 @@ def grade_answer_fallback(question, answer, content=""):
         "suggestions": suggestions
     }
 
+def generate_fallback_questions(content):
+    """Generate fallback questions when AI is not available"""
+    questions = [
+        "What are the main concepts discussed in this material?",
+        "How would you explain the key points to someone else?",
+        "What examples can you think of that relate to this topic?",
+        "What questions do you still have about this material?",
+        "How does this information connect to what you already know?"
+    ]
+    return questions
+
 @app.route("/")
-def home():
+def index():
     return render_template("index.html")
 
 @app.route("/upload", methods=["POST"])
 def upload_files():
-    """Handle file uploads for study materials"""
+    """Handle file uploads"""
     try:
-        if "files" not in request.files:
-            return jsonify({"success": False, "message": "No files uploaded"}), 400
+        if 'files' not in request.files:
+            return jsonify({'success': False, 'message': 'No files provided'}), 400
         
-        files = request.files.getlist("files")
-        uploaded_file_info = []
+        files = request.files.getlist('files')
+        uploaded_files_data = []
         
         for file in files:
-            if file.filename:
-                # Save file temporarily
-                filename = file.filename
-                file_path = os.path.join(tempfile.gettempdir(), filename)
-                file.save(file_path)
+            if file.filename == '':
+                continue
                 
-                # Read file content for AI processing
-                content = read_file_content(file_path)
+            # Save file temporarily
+            with tempfile.NamedTemporaryFile(delete=False, suffix=f"_{file.filename}") as tmp_file:
+                file.save(tmp_file.name)
                 
-                file_info = {
+                # Read content
+                content = read_file_content(tmp_file.name)
+                
+                # Store file info
+                file_data = {
                     'id': len(uploaded_files) + 1,
-                    'filename': filename,
-                    'file_path': file_path,
+                    'filename': file.filename,
+                    'size': len(content),
                     'content': content,
-                    'size': os.path.getsize(file_path),
+                    'file_path': tmp_file.name,
                     'uploaded_at': datetime.now().isoformat()
                 }
                 
-                uploaded_files.append(file_info)
-                uploaded_file_info.append(file_info)
+                uploaded_files.append(file_data)
+                uploaded_files_data.append(file_data)
         
         return jsonify({
             'success': True,
-            'files': uploaded_file_info,
-            'message': f'Successfully uploaded {len(uploaded_file_info)} files'
+            'message': f'Successfully uploaded {len(uploaded_files_data)} files',
+            'files': uploaded_files_data
         })
         
     except Exception as e:
@@ -306,13 +296,13 @@ def generate_questions():
             # Fallback to smart questions
             questions = generate_fallback_questions(content)
             source = "Smart-Generated"
-            print(f"⚠️  Using smart fallback questions")
+            print(f"⚠️ Using smart fallback questions")
         
         return jsonify({
             'success': True,
             'questions': questions,
             'source': source,
-            'llm_available': True,
+            'llm_available': llm_available,
             'message': f'Generated {len(questions)} study questions using {source}'
         })
         
@@ -322,9 +312,63 @@ def generate_questions():
             'message': f'Error generating questions: {str(e)}'
         }), 500
 
+@app.route("/generate_followup", methods=["POST"])
+def generate_followup():
+    """Generate follow-up questions based on answer quality"""
+    try:
+        data = request.get_json()
+        question = data.get('question', '')
+        answer = data.get('answer', '')
+        score = data.get('score', 0)
+        content = data.get('content', '')
+        
+        if not question or not answer:
+            return jsonify({
+                'success': False,
+                'message': 'Question and answer are required'
+            }), 400
+        
+        print(f"Generating follow-up questions for score: {score}/10")
+        
+        followup_questions = generate_followup_questions(question, answer, score, content)
+        
+        if followup_questions:
+            source = "AI-Generated Follow-ups"
+            print(f"✅ Generated {len(followup_questions)} follow-up questions")
+        else:
+            # Fallback follow-up questions
+            if score >= 8:
+                followup_questions = [
+                    "Can you provide a real-world example of this concept?",
+                    "How would you apply this knowledge in a different context?",
+                    "What are the implications of this concept?"
+                ]
+            else:
+                followup_questions = [
+                    "Can you explain this concept in simpler terms?",
+                    "What part of this topic would you like to review?",
+                    "How does this relate to the main study material?"
+                ]
+            source = "Smart Follow-ups"
+            print(f"⚠️ Using smart follow-up questions")
+        
+        return jsonify({
+            'success': True,
+            'questions': followup_questions,
+            'source': source,
+            'llm_available': llm_available,
+            'message': f'Generated {len(followup_questions)} follow-up questions'
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'message': f'Error generating follow-up questions: {str(e)}'
+        }), 500
+
 @app.route("/grade_answer", methods=["POST"])
 def grade_answer():
-    """Grade student's answer using AI"""
+    """Grade student answers using AI"""
     try:
         data = request.get_json()
         question = data.get('question', '')
@@ -339,25 +383,17 @@ def grade_answer():
         
         print(f"Grading answer: {answer[:50]}...")
         
-        # Try AI grading first
-        ai_result = grade_answer_with_ai(question, answer, content)
+        # Grade using AI or fallback
+        grade_result = grade_answer_with_ai(question, answer, content)
         
-        if ai_result:
-            score = ai_result.get('score', 7)
-            feedback = ai_result.get('feedback', 'Good answer!')
-            suggestions = ai_result.get('suggestions', 'Keep up the good work!')
-            source = "AI-Graded (Anthropic)"
-            print(f"✅ Graded using Anthropic AI: {score}/10")
-        else:
-            # Fallback to smart grading
-            fallback_result = grade_answer_fallback(question, answer, content)
-            score = fallback_result.get('score', 7)
-            feedback = fallback_result.get('feedback', 'Good answer!')
-            suggestions = fallback_result.get('suggestions', 'Keep up the good work!')
-            source = "Smart-Graded"
-            print(f"⚠️  Graded using smart fallback: {score}/10")
+        score = grade_result.get('score', 7)
+        feedback = grade_result.get('feedback', 'Good attempt!')
+        suggestions = grade_result.get('suggestions', 'Keep practicing!')
         
         is_correct = score >= 7
+        
+        source = "AI-Graded (Anthropic)" if llm_available else "Rule-Based"
+        print(f"✅ Graded using {source}: {score}/10")
         
         return jsonify({
             'success': True,
@@ -365,9 +401,9 @@ def grade_answer():
             'is_correct': is_correct,
             'feedback': feedback,
             'suggestions': suggestions,
+            'message': 'Answer graded successfully',
             'source': source,
-            'llm_available': True,
-            'message': f'Answer graded successfully using {source}'
+            'llm_available': llm_available
         })
         
     except Exception as e:
@@ -382,22 +418,22 @@ def save_session():
     try:
         data = request.get_json()
         
-        session = {
+        session_data = {
             'id': len(study_sessions) + 1,
+            'timestamp': datetime.now().isoformat(),
             'questions': data.get('questions', []),
             'answers': data.get('answers', []),
             'scores': data.get('scores', []),
             'total_score': data.get('total_score', 0),
-            'accuracy': data.get('accuracy', 0),
-            'created_at': datetime.now().isoformat()
+            'accuracy': data.get('accuracy', 0)
         }
         
-        study_sessions.append(session)
+        study_sessions.append(session_data)
         
         return jsonify({
             'success': True,
-            'session': session,
-            'message': 'Study session saved successfully'
+            'message': 'Session saved successfully',
+            'session_id': session_data['id']
         })
         
     except Exception as e:
@@ -417,31 +453,24 @@ def get_analytics():
                     'total_sessions': 0,
                     'average_score': 0,
                     'average_accuracy': 0,
-                    'total_questions': 0,
-                    'improvement_trend': [],
-                    'llm_usage': 0
+                    'sessions': []
                 }
             })
         
         total_sessions = len(study_sessions)
-        total_questions = sum(len(session.get('questions', [])) for session in study_sessions)
-        average_score = sum(session.get('total_score', 0) for session in study_sessions) / total_sessions
-        average_accuracy = sum(session.get('accuracy', 0) for session in study_sessions) / total_sessions
+        total_score = sum(session.get('total_score', 0) for session in study_sessions)
+        total_accuracy = sum(session.get('accuracy', 0) for session in study_sessions)
         
-        # Calculate improvement trend (last 5 sessions)
-        recent_sessions = study_sessions[-5:] if len(study_sessions) >= 5 else study_sessions
-        improvement_trend = [session.get('accuracy', 0) for session in recent_sessions]
+        analytics = {
+            'total_sessions': total_sessions,
+            'average_score': total_score / total_sessions if total_sessions > 0 else 0,
+            'average_accuracy': total_accuracy / total_sessions if total_sessions > 0 else 0,
+            'sessions': study_sessions[-10:]  # Last 10 sessions
+        }
         
         return jsonify({
             'success': True,
-            'analytics': {
-                'total_sessions': total_sessions,
-                'average_score': round(average_score, 2),
-                'average_accuracy': round(average_accuracy, 2),
-                'total_questions': total_questions,
-                'improvement_trend': improvement_trend,
-                'llm_available': True
-            }
+            'analytics': analytics
         })
         
     except Exception as e:
@@ -450,9 +479,8 @@ def get_analytics():
             'message': f'Error getting analytics: {str(e)}'
         }), 500
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     print("🎓 Starting StudyAI - AI-Powered Study Assistant...")
     print("📱 Open your browser and go to: http://localhost:8080")
-    print("🤖 AI Integration: ENABLED (Anthropic API + Smart Fallback)")
     print("🎤 Ready to help you study with AI!")
-    app.run(debug=True, host='0.0.0.0', port=8080)
+    app.run(host="0.0.0.0", port=8080, debug=True)

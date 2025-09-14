@@ -295,6 +295,20 @@
                     </div>
                 </div>
 
+                <!-- Follow-up Questions -->
+                <div id="followupQuestions" class="glass rounded-2xl p-6 hidden">
+                    <h3 class="text-xl font-bold mb-4">🔄 Follow-up Questions</h3>
+                    <div id="followupList" class="space-y-3 mb-6"></div>
+                    <div class="flex space-x-4">
+                        <button id="continueSessionBtn" class="btn-success flex-1 py-3 rounded-xl font-semibold">
+                            ➡️ Continue Session
+                        </button>
+                        <button id="newFollowupBtn" class="btn-primary flex-1 py-3 rounded-xl font-semibold">
+                            🔄 New Follow-ups
+                        </button>
+                    </div>
+                </div>
+
                 <!-- Study Session Complete -->
                 <div id="studyComplete" class="glass rounded-2xl p-6 hidden">
                     <h3 class="text-2xl font-bold mb-4 text-center">🎉 Study Session Complete!</h3>
@@ -304,7 +318,7 @@
                         <div class="text-lg text-gray-300" id="finalAccuracy"></div>
                         <p class="text-gray-400">Great job! You've completed your study session.</p>
                         <button id="newSessionBtn" class="btn-primary px-8 py-3 rounded-xl font-semibold">
-                            🚀 Start New Session
+                            �� Start New Session
                         </button>
                     </div>
                 </div>
@@ -323,12 +337,15 @@
             answers: [],
             scores: [],
             correctAnswers: 0,
-            isActive: false
+            isActive: false,
+            followupQuestions: [],
+            currentFollowupIndex: 0
         };
         
-        let uploadedFilesData = []; // Fixed: renamed to avoid conflict with DOM element
+        let uploadedFilesData = [];
         let recognition = null;
         let isRecording = false;
+        let currentQuestionData = null;
 
         // Initialize the application
         document.addEventListener('DOMContentLoaded', function() {
@@ -408,7 +425,6 @@
                         const result = await response.json();
 
                         if (result.success) {
-                            // Store the uploaded files data
                             uploadedFilesData = result.files;
                             
                             uploadedFilesContainer.classList.remove('hidden');
@@ -458,10 +474,8 @@
         // Start Study Session with Backend Integration
         async function startStudySession() {
             try {
-                // Get the actual content from uploaded files
                 let content = '';
                 if (uploadedFilesData && uploadedFilesData.length > 0) {
-                    // Combine all file contents
                     content = uploadedFilesData.map(file => file.content || '').join('\n\n');
                 }
                 
@@ -470,7 +484,6 @@
                     return;
                 }
 
-                // Generate questions using backend with actual content
                 const response = await fetch('/generate_questions', {
                     method: 'POST',
                     headers: {
@@ -490,6 +503,8 @@
                     studySession.scores = [];
                     studySession.correctAnswers = 0;
                     studySession.isActive = true;
+                    studySession.followupQuestions = [];
+                    studySession.currentFollowupIndex = 0;
                     
                     showQuestion();
                     updateProgress();
@@ -510,7 +525,12 @@
             const studyProgress = document.getElementById('studyProgress');
             
             if (studySession.currentQuestionIndex < studySession.questions.length) {
-                questionText.textContent = studySession.questions[studySession.currentQuestionIndex];
+                const question = studySession.questions[studySession.currentQuestionIndex];
+                questionText.textContent = question;
+                currentQuestionData = {
+                    question: question,
+                    index: studySession.currentQuestionIndex
+                };
                 currentQuestion.classList.remove('hidden');
                 studyProgress.classList.remove('hidden');
             } else {
@@ -571,7 +591,6 @@
             try {
                 const question = studySession.questions[studySession.currentQuestionIndex];
                 
-                // Send to backend for AI grading
                 const response = await fetch('/grade_answer', {
                     method: 'POST',
                     headers: {
@@ -628,6 +647,13 @@
                 studySession.correctAnswers++;
             }
 
+            // Store current question data for follow-ups
+            currentQuestionData = {
+                ...currentQuestionData,
+                answer: answer,
+                score: result.score
+            };
+
             aiFeedback.classList.remove('hidden');
             updateProgress();
         }
@@ -636,7 +662,78 @@
         function nextQuestion() {
             studySession.currentQuestionIndex++;
             document.getElementById('aiFeedback').classList.add('hidden');
+            document.getElementById('followupQuestions').classList.add('hidden');
             showQuestion();
+        }
+
+        // Generate follow-up questions
+        async function generateFollowupQuestions() {
+            try {
+                if (!currentQuestionData) {
+                    showNotification('No question data available for follow-ups.', 'error');
+                    return;
+                }
+
+                const response = await fetch('/generate_followup', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        question: currentQuestionData.question,
+                        answer: currentQuestionData.answer,
+                        score: currentQuestionData.score,
+                        content: uploadedFilesData.map(file => file.content || '').join('\n\n')
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    studySession.followupQuestions = result.questions;
+                    studySession.currentFollowupIndex = 0;
+                    showFollowupQuestions();
+                } else {
+                    showNotification('Error generating follow-up questions: ' + result.message, 'error');
+                }
+            } catch (error) {
+                console.error('Error generating follow-up questions:', error);
+                showNotification('Error generating follow-up questions. Please try again.', 'error');
+            }
+        }
+
+        // Show follow-up questions
+        function showFollowupQuestions() {
+            const followupContainer = document.getElementById('followupQuestions');
+            const followupList = document.getElementById('followupList');
+            
+            followupList.innerHTML = '';
+            
+            studySession.followupQuestions.forEach((question, index) => {
+                const questionItem = document.createElement('div');
+                questionItem.className = 'p-4 bg-slate-800/50 rounded-lg';
+                questionItem.innerHTML = `
+                    <div class="flex items-start space-x-3">
+                        <span class="text-lg font-bold text-blue-400">${index + 1}.</span>
+                        <p class="text-gray-300">${question}</p>
+                    </div>
+                `;
+                followupList.appendChild(questionItem);
+            });
+            
+            document.getElementById('aiFeedback').classList.add('hidden');
+            followupContainer.classList.remove('hidden');
+        }
+
+        // Continue session from follow-ups
+        function continueSession() {
+            document.getElementById('followupQuestions').classList.add('hidden');
+            nextQuestion();
+        }
+
+        // Generate new follow-up questions
+        function newFollowupQuestions() {
+            generateFollowupQuestions();
         }
 
         // Show completion screen
@@ -655,8 +752,9 @@
             studyComplete.classList.remove('hidden');
             document.getElementById('currentQuestion').classList.add('hidden');
             document.getElementById('studyProgress').classList.add('hidden');
+            document.getElementById('aiFeedback').classList.add('hidden');
+            document.getElementById('followupQuestions').classList.add('hidden');
             
-            // Save session to backend
             saveSession();
         }
 
@@ -708,6 +806,9 @@
             document.getElementById('startStudyBtn').addEventListener('click', startStudySession);
             document.getElementById('recordBtn').addEventListener('click', toggleRecording);
             document.getElementById('nextQuestionBtn').addEventListener('click', nextQuestion);
+            document.getElementById('followUpBtn').addEventListener('click', generateFollowupQuestions);
+            document.getElementById('continueSessionBtn').addEventListener('click', continueSession);
+            document.getElementById('newFollowupBtn').addEventListener('click', newFollowupQuestions);
             document.getElementById('newSessionBtn').addEventListener('click', () => {
                 location.reload();
             });
