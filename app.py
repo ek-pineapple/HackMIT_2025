@@ -116,43 +116,23 @@ def generate_followup_questions(question, answer, score, content=""):
     try:
         if score >= 8:
             # Good answer - generate deeper questions
-            prompt = f"""The student gave a good answer (score: {score}/10) to this question: "{question}"
-
-Generate 3 follow-up questions that test deeper understanding and application. Return ONLY a JSON array of strings.
-
-Study material context: {content[:1000]}
-
-Return format: ["Follow-up 1", "Follow-up 2", "Follow-up 3"]"""
+            prompt = "I am trying to study this material: " + content + " I was quizzed this question" + question + " and this was my answer " + answer + " Give me 3 questions that help me think deeper about this content that I need to know"
         else:
             # Poor answer - generate clarifying questions
-            prompt = f"""The student gave a poor answer (score: {score}/10) to this question: "{question}"
-
-Student's answer: "{answer}"
-
-Generate 3 follow-up questions that help clarify the concept and test basic understanding. Return ONLY a JSON array of strings.
-
-Study material context: {content[:1000]}
-
-Return format: ["Follow-up 1", "Follow-up 2", "Follow-up 3"]"""
+            prompt = "I am trying to study this material: " + content + " I was quizzed this question" + question + " and this was my answer " + answer + " Please ask me 3 hint type questions that can guide me in the right direction to answering these questions"
+        
+        format = " the return format must be a new line between each question and no extra characters"
         
         if llm_available and llm_client:
             message = llm_client.messages.create(
-                model="claude-3-sonnet-20240229",
-                max_tokens=512,
-                messages=[{"role": "user", "content": prompt}]
+                model="claude-opus-4-1-20250805",
+                max_tokens=1024,
+                messages=[{"role": "user", "content": prompt + format}]
             )
             output = message.content[0].text.strip()
             print(f"Follow-up LLM Response: {output}")
-            
-            try:
-                questions = json.loads(output)
-                if isinstance(questions, list):
-                    return questions[:3]
-            except json.JSONDecodeError:
-                pass
-            
-            # Fallback parsing
-            lines = [line.strip() for line in output.split('\n') if line.strip()]
+
+            lines = output.strip().split("\n")
             questions = []
             for line in lines:
                 if line.startswith('"') and line.endswith('"'):
@@ -177,7 +157,7 @@ def grade_answer_with_ai(question, answer, content=""):
         if llm_available and llm_client:
             message = llm_client.messages.create(
                 model="claude-opus-4-1-20250805",
-                max_tokens=512,
+                max_tokens=1024,
                 messages=[{"role": "user", "content": prompt}]
             )
             output = message.content[0].text.strip()
