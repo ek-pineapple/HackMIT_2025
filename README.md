@@ -191,7 +191,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Contact
 
-- **GitHub**: [@parthib-paul](https://github.com/parthib-paul)
+- **GitHub**: [@parthib-paul](https://github.com/parthib-paul) [@ek-pineapple(https://github.com/ek-pineapple)
 - **Project**: [ThinkAloud](https://github.com/parthib-paul/HackMIT)
 
 ---
