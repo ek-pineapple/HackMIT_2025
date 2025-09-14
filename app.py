@@ -15,21 +15,29 @@ app.config["SECRET_KEY"] = "studyai-secret-key"
 study_sessions = []
 uploaded_files = []
 
-ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
+important_things = []
+Official_Questions = []
+Official_Answers = []
+Official_Dictionary = {}
 
-llm_client = None
-llm_available = False
+def anthro_key():
+    ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
 
-if ANTHROPIC_API_KEY:
-    try:
-        llm_client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
-        llm_available = True
-        print("🤖 AI Integration: ENABLED (Anthropic Claude AI)")
-    except Exception as e:
-        print(f"⚠️ LLM not available: {e}")
-        print("⚠️ LLM Integration: DISABLED (Fallback mode)")
-else:
-    print("⚠️ ANTHROPIC_API_KEY not found. LLM Integration: DISABLED (Fallback mode)")
+    if ANTHROPIC_API_KEY:
+        try:
+            llm_client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
+            llm_available = True
+            important_things.append(llm_client)
+            important_things.append(llm_available)
+            print("🤖 AI Integration: ENABLED (Anthropic Claude AI)")
+        except Exception as e:
+            print(f"⚠️ LLM not available: {e}")
+            print("⚠️ LLM Integration: DISABLED (Fallback mode)")
+    else:
+        print("⚠️ ANTHROPIC_API_KEY not found. LLM Integration: DISABLED (Fallback mode)")
+    
+    return ANTHROPIC_API_KEY
+
 
 def read_file_content(file_path):
     """Read file content with proper encoding handling"""
@@ -48,50 +56,63 @@ def read_file_content(file_path):
 def generate_questions_with_ai(content):
     """Generate questions using Anthropic API or fallback"""
     try:
-        prompt = f"""Based on the following study material, generate exactly 5 thoughtful questions that test understanding and application.
+        prompt = "Based on the following study material, generate exactly 5 thoughtful questions and answers that test understanding and application. IMPORTANT: Return ONLY valid JSON, Format: an array of objects, each with \"Question\" and \"Answer\" keys, No explanations, no prefixes, no markdown, no text outside the JSON."
 
-IMPORTANT: Return ONLY a JSON array of strings, no other text, no explanations, no prefixes.
+        key = anthro_key()
+        llm_client = important_things[0]
+        llm_available = important_things[1]
 
-Study material:
-{content[:2000]}
-
-Return format:
-["Question 1", "Question 2", "Question 3", "Question 4", "Question 5"]"""
-        
         if llm_available and llm_client:
             message = llm_client.messages.create(
-                model="claude-3-sonnet-20240229",
+                model="claude-opus-4-1-20250805",
                 max_tokens=1024,
-                messages=[{"role": "user", "content": prompt}]
+                messages=[{"role": "user", "content": prompt+content}]
             )
+            # Get raw text response
             output = message.content[0].text.strip()
             print(f"LLM Response: {output}")
             
-            # Try to parse as JSON array
-            try:
-                questions = json.loads(output)
-                if isinstance(questions, list) and len(questions) >= 5:
-                    return questions[:5]
-            except json.JSONDecodeError:
-                pass
+            # Parse the JSON array
+            questions_data = json.loads(output)
+
+            # Extract only the "Question" fields
+            questions_only = [item["Question"] for item in questions_data]
+            answers_only = [item["Answer"] for item in questions_data]
+            Official_Questions.append(questions_only)
+            Official_Answers.append(answers_only)
+            Official_Dictionary.update(dict(zip(questions_only, answers_only)))
+
+            return questions_only
+            #answers_only = [item["Answers"] for item in questions_data]
+
+    #         # Try to parse as JSON array
+    #         try:
+    #             questions = json.loads(output)
+    #             if isinstance(questions, list) and len(questions) >= 5:
+    #                 return questions[:5]
+    #         except json.JSONDecodeError:
+    #             pass
             
-            # Fallback: try to extract questions from text
-            lines = [line.strip() for line in output.split('\n') if line.strip()]
-            questions = []
-            for line in lines:
-                if line.startswith('"') and line.endswith('"'):
-                    questions.append(line[1:-1])
-                elif '?' in line and len(line) > 10:
-                    questions.append(line)
-            return questions[:5] if questions else None
-        else:
-            return None
+    #         # Fallback: try to extract questions from text
+    #         lines = [line.strip() for line in output.split('\n') if line.strip()]
+    #         questions = []
+    #         for line in lines:
+    #             if line.startswith('"') and line.endswith('"'):
+    #                 questions.append(line[1:-1])
+    #             elif '?' in line and len(line) > 10:
+    #                 questions.append(line)
+    #         return questions[:5] if questions else None
+    #     else:
+    #         return None
     except Exception as e:
         print(f"Error generating questions with AI: {e}")
         return None
 
 def generate_followup_questions(question, answer, score, content=""):
     """Generate follow-up questions based on the answer quality"""
+    key = anthro_key()
+    llm_client = important_things[0]
+    llm_available = important_things[1]
     try:
         if score >= 8:
             # Good answer - generate deeper questions
@@ -147,27 +168,20 @@ Return format: ["Follow-up 1", "Follow-up 2", "Follow-up 3"]"""
 
 def grade_answer_with_ai(question, answer, content=""):
     """Grade answer using Anthropic API or fallback"""
+    
     try:
-        prompt = f"""Grade this student's answer on a scale of 1-10 and provide feedback.
+        prompt = "Based on this question" + question + "check the answer against the content and score it out of 10. Content: " + content
+        llm_client = important_things[0]
+        llm_available = important_things[1]
 
-Question: {question}
-Student Answer: {answer}
-Study Material Context: {content[:1000]}
-
-Return ONLY a JSON object with this exact format:
-{{
-    "score": <number between 1-10>,
-    "feedback": "<detailed feedback>",
-    "suggestions": "<improvement suggestions>"
-}}"""
-        
         if llm_available and llm_client:
             message = llm_client.messages.create(
-                model="claude-3-sonnet-20240229",
+                model="claude-opus-4-1-20250805",
                 max_tokens=512,
                 messages=[{"role": "user", "content": prompt}]
             )
             output = message.content[0].text.strip()
+            print(output)
             print(f"Grading LLM Response: {output}")
             
             try:
@@ -178,36 +192,51 @@ Return ONLY a JSON object with this exact format:
                 pass
         
         # Fallback grading
-        return simulate_ai_grading(question, answer)
+        return simulate_ai_grading(question, answer, content)
     except Exception as e:
         print(f"Error grading with AI: {e}")
-        return simulate_ai_grading(question, answer)
+        return simulate_ai_grading(question, answer, content)
+    
+def simulate_ai_grading(question, answer, content=""):
 
-def simulate_ai_grading(question, answer):
-    """Fallback grading system"""
-    score = 7  # Default score
-    feedback = "Good attempt! Your answer shows understanding of the topic."
-    suggestions = "Try to provide more specific examples and details."
-    
-    # Simple keyword-based scoring
-    if len(answer) < 20:
-        score = 3
-        feedback = "Your answer is too brief. Please provide more detail."
-        suggestions = "Expand your answer with specific examples and explanations."
-    elif any(word in answer.lower() for word in ['i don\'t know', 'not sure', 'maybe']):
-        score = 4
-        feedback = "It's okay to be uncertain, but try to apply what you know."
-        suggestions = "Use the study material to form a more confident answer."
-    elif len(answer) > 100:
-        score = 8
-        feedback = "Excellent detailed answer! You've shown good understanding."
-        suggestions = "Keep up the great work with detailed explanations!"
-    
-    return {
+    try:
+        prompt = "I am trying to learn this content: " + content + " The question given to me to quiz me on this content was " + question + "This was my answer: " + answer + " Please grade me out of 10 as if you were my professor with 0 being fail and 10 being above and beyond"
+        response_prompt = "Make the response format just a number (score), feedback on the next line, and suggestions on a new line. No need to include any header type words "
+
+        key = anthro_key()
+        llm_client = important_things[0]
+        llm_available = important_things[1]
+
+        if llm_available and llm_client:
+            message = llm_client.messages.create(
+                model="claude-opus-4-1-20250805",
+                max_tokens=1024,
+                messages=[{"role": "user", "content": prompt + response_prompt}]
+            )
+            # Get raw text response
+            output = message.content[0].text.strip()
+            print(f"LLM Response: {output}")
+
+    except Exception as e:
+        print(f"Error generating questions with AI: {e}")
+        return None
+    lines = output.strip().split("\n")
+
+    score = int(lines[0].strip())
+    feedback = " ".join(lines[1:-1]).strip()
+    suggestions = lines[-1].strip()
+
+    parsed = {
         "score": score,
         "feedback": feedback,
         "suggestions": suggestions
     }
+    
+    print(type(output))
+    print(output)
+
+    return parsed
+    
 
 def generate_fallback_questions(content):
     """Generate fallback questions when AI is not available"""
@@ -219,6 +248,49 @@ def generate_fallback_questions(content):
         "How does this information connect to what you already know?"
     ]
     return questions
+
+# def simulate_ai_grading(question, content=""):
+#     answer = content
+#     print(question in Official_Questions)
+#     if question in Official_Questions:
+#         answer = Official_Dictionary[question]
+#     print(question)
+#     print(answer)
+#     """Fallback grading system"""
+#     score = 7  # Default score
+#     feedback = "Good attempt! Your answer shows understanding of the topic."
+#     suggestions = "Try to provide more specific examples and details."
+    
+#     # Simple keyword-based scoring
+#     if len(answer) < 20:
+#         score = 3
+#         feedback = "Your answer is too brief. Please provide more detail."
+#         suggestions = "Expand your answer with specific examples and explanations."
+#     elif any(word in answer.lower() for word in ['i don\'t know', 'not sure', 'maybe']):
+#         score = 4
+#         feedback = "It's okay to be uncertain, but try to apply what you know."
+#         suggestions = "Use the study material to form a more confident answer."
+#     elif len(answer) > 100:
+#         score = 8
+#         feedback = "Excellent detailed answer! You've shown good understanding."
+#         suggestions = "Keep up the great work with detailed explanations!"
+    
+#     return {
+#         "score": score,
+#         "feedback": feedback,
+#         "suggestions": suggestions
+#     }
+
+# def generate_fallback_questions(content):
+#     """Generate fallback questions when AI is not available"""
+#     questions = [
+#         "What are the main concepts discussed in this material?",
+#         "How would you explain the key points to someone else?",
+#         "What examples can you think of that relate to this topic?",
+#         "What questions do you still have about this material?",
+#         "How does this information connect to what you already know?"
+#     ]
+#     return questions
 
 @app.route("/")
 def index():
@@ -297,7 +369,9 @@ def generate_questions():
             questions = generate_fallback_questions(content)
             source = "Smart-Generated"
             print(f"⚠️ Using smart fallback questions")
-        
+        key = anthro_key()
+        llm_client = important_things[0]
+        llm_available = important_things[1]
         return jsonify({
             'success': True,
             'questions': questions,
@@ -351,7 +425,9 @@ def generate_followup():
                 ]
             source = "Smart Follow-ups"
             print(f"⚠️ Using smart follow-up questions")
-        
+        key = anthro_key()
+        llm_client = important_things[0]
+        llm_available = important_things[1]
         return jsonify({
             'success': True,
             'questions': followup_questions,
@@ -371,6 +447,7 @@ def grade_answer():
     """Grade student answers using AI"""
     try:
         data = request.get_json()
+        print(data)
         question = data.get('question', '')
         answer = data.get('answer', '')
         content = data.get('content', '')
@@ -384,14 +461,16 @@ def grade_answer():
         print(f"Grading answer: {answer[:50]}...")
         
         # Grade using AI or fallback
-        grade_result = grade_answer_with_ai(question, answer, content)
+        grade_result = simulate_ai_grading(question, answer, content)
         
         score = grade_result.get('score', 7)
         feedback = grade_result.get('feedback', 'Good attempt!')
         suggestions = grade_result.get('suggestions', 'Keep practicing!')
         
         is_correct = score >= 7
-        
+        key = anthro_key()
+        llm_client = important_things[0]
+        llm_available = important_things[1]
         source = "AI-Graded (Anthropic)" if llm_available else "Rule-Based"
         print(f"✅ Graded using {source}: {score}/10")
         
