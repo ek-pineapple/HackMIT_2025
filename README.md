@@ -1,6 +1,8 @@
 # 🎓 StudyAI - AI-Powered Study Assistant
 
 > **Voice-first AI study companion that transforms your notes into interactive learning sessions**
+>
+> Note: To view commit history, also view this repo: https://github.com/parthib-paul/HackMIT
 
 [![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://python.org)
 [![Flask](https://img.shields.io/badge/Flask-2.3.3-green.svg)](https://flask.palletsprojects.com)
@@ -42,10 +44,7 @@ pip install -r requirements.txt
 
 Create a `.env` file in the project root:
 
-```bash
-# Optional: For AI-powered features
-ANTHROPIC_API_KEY=your_anthropic_api_key_here
-```
+You will need to add an anthropic_api_key in env file and add a open_ai api key. 
 
 **Note**: The app works without API keys using smart fallback questions!
 
@@ -193,7 +192,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 📞 Contact
 
 - **GitHub**: [@parthib-paul](https://github.com/parthib-paul)
-- **Project**: [StudyAI](https://github.com/parthib-paul/HackMIT)
+- **Project**: [ThinkAloud](https://github.com/parthib-paul/HackMIT)
 
 ---
 
