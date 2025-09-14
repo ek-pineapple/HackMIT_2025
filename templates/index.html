@@ -49,118 +49,70 @@
             100% { transform: translateX(calc(100vw + 100px)) rotate(360deg); }
         }
         
-        .shape-1 { animation-delay: 0s; }
-        .shape-2 { animation-delay: -5s; }
-        .shape-3 { animation-delay: -10s; }
-        
-        /* Gradient Text */
-        .gradient-text {
-            background: linear-gradient(135deg, #1e40af, #7c3aed, #0891b2);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
+        .floating-shape:nth-child(1) { top: 10%; animation-duration: 20s; }
+        .floating-shape:nth-child(2) { top: 30%; animation-duration: 25s; }
+        .floating-shape:nth-child(3) { top: 50%; animation-duration: 18s; }
+        .floating-shape:nth-child(4) { top: 70%; animation-duration: 22s; }
+        .floating-shape:nth-child(5) { top: 90%; animation-duration: 16s; }
         
         /* Glass Effect */
-        .glass-effect {
-            background: rgba(15, 23, 42, 0.8);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(59, 130, 246, 0.2);
+        .glass {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
         
-        /* Mature Button Styles */
+        /* Button Styles */
         .btn-primary {
-            background: linear-gradient(135deg, #1e40af, #3730a3);
-            border: 1px solid rgba(59, 130, 246, 0.3);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             transition: all 0.3s ease;
         }
         
         .btn-primary:hover {
-            background: linear-gradient(135deg, #1d4ed8, #4338ca);
+            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
             transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
         }
         
         .btn-secondary {
-            background: linear-gradient(135deg, #374151, #4b5563);
-            border: 1px solid rgba(75, 85, 99, 0.3);
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
             transition: all 0.3s ease;
         }
         
         .btn-secondary:hover {
-            background: linear-gradient(135deg, #4b5563, #6b7280);
+            background: linear-gradient(135deg, #e085f0 0%, #f04a5c 100%);
             transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(75, 85, 99, 0.3);
+            box-shadow: 0 10px 25px rgba(240, 147, 251, 0.4);
         }
         
         .btn-success {
-            background: linear-gradient(135deg, #059669, #047857);
-            border: 1px solid rgba(5, 150, 105, 0.3);
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
             transition: all 0.3s ease;
         }
         
         .btn-success:hover {
-            background: linear-gradient(135deg, #10b981, #059669);
+            background: linear-gradient(135deg, #3d8bfe 0%, #00e0fe 100%);
             transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(5, 150, 105, 0.3);
+            box-shadow: 0 10px 25px rgba(79, 172, 254, 0.4);
         }
         
         .btn-danger {
-            background: linear-gradient(135deg, #dc2626, #b91c1c);
-            border: 1px solid rgba(220, 38, 38, 0.3);
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
             transition: all 0.3s ease;
         }
         
         .btn-danger:hover {
-            background: linear-gradient(135deg, #ef4444, #dc2626);
+            background: linear-gradient(135deg, #f85f8a 0%, #fed030 100%);
             transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(220, 38, 38, 0.3);
+            box-shadow: 0 10px 25px rgba(250, 112, 154, 0.4);
         }
         
-        /* Upload Area */
-        .upload-area {
-            border: 2px dashed rgba(59, 130, 246, 0.5);
-            transition: all 0.3s ease;
+        /* Glow Effects */
+        .glow {
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
         }
         
-        .upload-area:hover {
-            border-color: rgba(59, 130, 246, 0.8);
-            background: rgba(59, 130, 246, 0.05);
-        }
-        
-        .upload-area.dragover {
-            border-color: #3b82f6;
-            background: rgba(59, 130, 246, 0.1);
-        }
-        
-        /* Question Card */
-        .question-card {
-            background: linear-gradient(135deg, rgba(30, 64, 175, 0.1), rgba(124, 58, 237, 0.1));
-            border: 1px solid rgba(59, 130, 246, 0.2);
-        }
-        
-        /* Answer Recording */
-        .recording-pulse {
-            animation: recordingPulse 1.5s ease-in-out infinite;
-        }
-        
-        @keyframes recordingPulse {
-            0%, 100% { transform: scale(1); opacity: 0.8; }
-            50% { transform: scale(1.1); opacity: 1; }
-        }
-        
-        /* Progress Bar */
-        .progress-bar {
-            background: linear-gradient(90deg, #1e40af, #7c3aed, #0891b2);
-            animation: progressGlow 2s ease-in-out infinite;
-        }
-        
-        @keyframes progressGlow {
-            0%, 100% { box-shadow: 0 0 5px rgba(59, 130, 246, 0.5); }
-            50% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.8); }
-        }
-        
-        /* Fade In Animation */
+        /* Animations */
         .fade-in {
             animation: fadeIn 0.5s ease-in;
         }
@@ -170,233 +122,232 @@
             to { opacity: 1; transform: translateY(0); }
         }
         
-        /* Floating Animation */
-        .floating {
-            animation: floating 3s ease-in-out infinite;
+        .slide-in {
+            animation: slideIn 0.3s ease-out;
         }
         
-        @keyframes floating {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
+        @keyframes slideIn {
+            from { transform: translateX(-100%); }
+            to { transform: translateX(0); }
+        }
+        
+        /* Upload Area */
+        .upload-area {
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .upload-area:hover {
+            border-color: rgba(59, 130, 246, 0.6);
+            background: rgba(59, 130, 246, 0.1);
+        }
+        
+        .upload-area.dragover {
+            border-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.2);
+        }
+        
+        /* Recording Animation */
+        .recording {
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
         }
     </style>
 </head>
-<body class="bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 min-h-screen relative">
-    <!-- Dynamic Particle Background -->
-    <div id="particles" class="fixed inset-0 overflow-hidden pointer-events-none"></div>
-    
-    <!-- Floating Geometric Shapes -->
-    <div class="fixed inset-0 overflow-hidden pointer-events-none">
-        <div class="floating-shape shape-1 w-20 h-20 bg-blue-500 rounded-lg transform rotate-45"></div>
-        <div class="floating-shape shape-2 w-16 h-16 bg-purple-500 rounded-full"></div>
-        <div class="floating-shape shape-3 w-24 h-24 bg-cyan-500 transform rotate-12"></div>
+<body class="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white">
+    <!-- Dynamic Background -->
+    <div id="particlesContainer" class="fixed inset-0 pointer-events-none"></div>
+    <div class="fixed inset-0 pointer-events-none">
+        <div class="floating-shape w-16 h-16 bg-blue-500 rounded-full"></div>
+        <div class="floating-shape w-12 h-12 bg-purple-500 rounded-lg"></div>
+        <div class="floating-shape w-20 h-20 bg-cyan-500 rounded-full"></div>
+        <div class="floating-shape w-14 h-14 bg-pink-500 rounded-lg"></div>
+        <div class="floating-shape w-18 h-18 bg-indigo-500 rounded-full"></div>
     </div>
 
     <div class="relative z-10 container mx-auto px-4 py-8">
-        <div class="max-w-6xl mx-auto">
-            <!-- Header -->
-            <div class="text-center mb-8">
-                <h1 class="text-6xl font-bold gradient-text mb-4 floating">
-                    🎓 StudyAI
-                </h1>
-                <p class="text-xl text-blue-200 mb-2">
-                    AI-Powered Study Assistant for Interactive Learning
-                </p>
-                <p class="text-sm text-blue-300">
-                    Upload notes • Answer questions • Get instant feedback • Master your subjects
-                </p>
-            </div>
+        <!-- Header -->
+        <div class="text-center mb-12 fade-in">
+            <h1 class="text-5xl font-bold mb-4 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                StudyAI
+            </h1>
+            <p class="text-xl text-gray-300 mb-8">
+                AI-Powered Study Assistant for Interactive Learning
+            </p>
+        </div>
 
-            <!-- Main Content -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <!-- Left Panel: Notes Upload & Study Session -->
-                <div class="space-y-6">
-                    <!-- Notes Upload Section -->
-                    <div class="glass-effect rounded-2xl p-6 fade-in">
-                        <h2 class="text-2xl font-semibold text-white mb-4 flex items-center">
-                            📚 Upload Study Materials
-                        </h2>
-                        
-                        <div id="uploadArea" class="upload-area rounded-xl p-8 text-center mb-4">
-                            <div class="text-6xl mb-4">📄</div>
-                            <p class="text-gray-300 mb-2">Drag & drop your notes here</p>
-                            <p class="text-sm text-gray-400">or click to browse files</p>
-                            <input type="file" id="fileInput" class="hidden" accept=".pdf,.txt,.doc,.docx" multiple>
-                        </div>
-                        
-                        <div id="uploadedFiles" class="space-y-2 hidden">
-                            <h3 class="text-lg font-medium text-white">Uploaded Files:</h3>
-                            <div id="fileList" class="space-y-2"></div>
-                        </div>
-                        
-                        <button id="startStudyBtn" class="btn-primary w-full py-3 px-6 rounded-xl font-semibold text-white disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-                            🚀 Start Study Session
-                        </button>
+        <!-- Main Content -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Left Panel: Notes Upload & Study Session -->
+            <div class="space-y-6">
+                <!-- File Upload Section -->
+                <div class="glass rounded-2xl p-6 fade-in">
+                    <h2 class="text-2xl font-bold mb-4 text-center">📚 Notes Upload & Study Session</h2>
+                    
+                    <!-- Upload Area -->
+                    <div id="uploadArea" class="upload-area rounded-xl p-8 text-center cursor-pointer mb-4">
+                        <div class="text-6xl mb-4">📁</div>
+                        <p class="text-lg mb-2">Drag & drop your study materials here</p>
+                        <p class="text-sm text-gray-400 mb-4">or click to browse files</p>
+                        <p class="text-xs text-gray-500">Supports: PDF, TXT, DOC, DOCX</p>
+                        <input type="file" id="fileInput" multiple accept=".pdf,.txt,.doc,.docx" class="hidden">
                     </div>
+                    
+                    <!-- Uploaded Files -->
+                    <div id="uploadedFilesContainer" class="hidden">
+                        <h3 class="text-lg font-semibold mb-3">📄 Uploaded Files</h3>
+                        <div id="fileList" class="space-y-2"></div>
+                    </div>
+                    
+                    <!-- Start Study Button -->
+                    <button id="startStudyBtn" disabled class="btn-primary w-full py-3 rounded-xl font-semibold text-lg disabled:opacity-50 disabled:cursor-not-allowed">
+                        🚀 Start Study Session
+                    </button>
+                </div>
 
-                    <!-- Study Progress -->
-                    <div class="glass-effect rounded-2xl p-6 fade-in">
-                        <h3 class="text-xl font-semibold text-white mb-4">📊 Study Progress</h3>
-                        <div class="space-y-4">
-                            <div>
-                                <div class="flex justify-between text-sm text-gray-300 mb-2">
-                                    <span>Questions Answered</span>
-                                    <span id="questionsAnswered">0/10</span>
-                                </div>
-                                <div class="w-full bg-gray-700 rounded-full h-2">
-                                    <div id="progressBar" class="progress-bar h-2 rounded-full" style="width: 0%"></div>
-                                </div>
+                <!-- Study Progress -->
+                <div id="studyProgress" class="glass rounded-2xl p-6 hidden">
+                    <h3 class="text-xl font-bold mb-4">📊 Study Progress</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between text-sm mb-1">
+                                <span>Progress</span>
+                                <span id="progressText">0/0</span>
                             </div>
-                            <div class="grid grid-cols-2 gap-4 text-center">
-                                <div class="bg-slate-800/50 rounded-lg p-3">
-                                    <div class="text-2xl font-bold text-green-400" id="correctAnswers">0</div>
-                                    <div class="text-sm text-gray-400">Correct</div>
-                                </div>
-                                <div class="bg-slate-800/50 rounded-lg p-3">
-                                    <div class="text-2xl font-bold text-blue-400" id="accuracy">0%</div>
-                                    <div class="text-sm text-gray-400">Accuracy</div>
-                                </div>
+                            <div class="w-full bg-gray-700 rounded-full h-2">
+                                <div id="progressBar" class="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-3 gap-4 text-center">
+                            <div class="bg-slate-800/50 rounded-lg p-3">
+                                <div class="text-2xl font-bold text-blue-400" id="questionsAnswered">0</div>
+                                <div class="text-sm text-gray-400">Questions</div>
+                            </div>
+                            <div class="bg-slate-800/50 rounded-lg p-3">
+                                <div class="text-2xl font-bold text-green-400" id="correctAnswers">0</div>
+                                <div class="text-sm text-gray-400">Correct</div>
+                            </div>
+                            <div class="bg-slate-800/50 rounded-lg p-3">
+                                <div class="text-2xl font-bold text-purple-400" id="accuracy">0%</div>
+                                <div class="text-sm text-gray-400">Accuracy</div>
                             </div>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- Right Panel: AI Questions & Answers -->
-                <div class="space-y-6">
-                    <!-- Current Question -->
-                    <div id="questionSection" class="glass-effect rounded-2xl p-6 fade-in hidden">
-                        <h3 class="text-xl font-semibold text-white mb-4">🤖 AI Question</h3>
-                        <div class="question-card rounded-xl p-6 mb-6">
-                            <p id="currentQuestion" class="text-gray-200 text-lg leading-relaxed"></p>
-                        </div>
-                        
-                        <!-- Answer Recording -->
-                        <div class="text-center">
-                            <button id="recordAnswerBtn" class="btn-primary py-4 px-8 rounded-full text-xl font-semibold text-white recording-pulse">
-                                🎤 Record Your Answer
-                            </button>
-                            <p class="text-sm text-gray-400 mt-2">Press and hold to record your verbal answer</p>
-                        </div>
-                        
-                        <!-- Answer Status -->
-                        <div id="answerStatus" class="mt-4 text-center hidden">
-                            <div class="flex items-center justify-center space-x-2 text-cyan-400">
-                                <div class="w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></div>
-                                <div class="w-2 h-2 bg-cyan-400 rounded-full animate-pulse" style="animation-delay: 0.2s;"></div>
-                                <div class="w-2 h-2 bg-cyan-400 rounded-full animate-pulse" style="animation-delay: 0.4s;"></div>
-                                <span class="ml-2 text-sm">Processing your answer...</span>
-                            </div>
+            <!-- Right Panel: AI Questions & Answers -->
+            <div class="space-y-6">
+                <!-- Current Question -->
+                <div id="currentQuestion" class="glass rounded-2xl p-6 hidden">
+                    <h3 class="text-xl font-bold mb-4">❓ Current Question</h3>
+                    <div id="questionText" class="text-lg mb-6 p-4 bg-slate-800/50 rounded-lg"></div>
+                    
+                    <!-- Recording Interface -->
+                    <div class="text-center">
+                        <button id="recordBtn" class="btn-secondary px-8 py-4 rounded-full text-xl font-semibold mb-4">
+                            🎤 Record Your Answer
+                        </button>
+                        <div id="recordingStatus" class="hidden text-center">
+                            <div class="recording text-4xl mb-2">🔴</div>
+                            <p class="text-lg">Recording... Speak now!</p>
+                            <p class="text-sm text-gray-400 mt-2">Click stop when finished</p>
                         </div>
                     </div>
+                </div>
 
-                    <!-- AI Feedback -->
-                    <div id="feedbackSection" class="glass-effect rounded-2xl p-6 fade-in hidden">
-                        <h3 class="text-xl font-semibold text-white mb-4">💡 AI Feedback</h3>
-                        <div id="feedbackContent" class="space-y-4">
-                            <!-- Feedback will be populated here -->
+                <!-- AI Feedback -->
+                <div id="aiFeedback" class="glass rounded-2xl p-6 hidden">
+                    <h3 class="text-xl font-bold mb-4">🤖 AI Feedback</h3>
+                    <div class="space-y-4">
+                        <div class="p-4 bg-slate-800/50 rounded-lg">
+                            <h4 class="font-semibold mb-2">Your Answer:</h4>
+                            <p id="studentAnswer" class="text-gray-300"></p>
                         </div>
-                        
-                        <div class="flex space-x-3 mt-6">
-                            <button id="nextQuestionBtn" class="btn-primary flex-1 py-3 px-6 rounded-xl font-semibold text-white">
-                                ➡️ Next Question
-                            </button>
-                            <button id="followUpBtn" class="btn-secondary flex-1 py-3 px-6 rounded-xl font-semibold text-white hidden">
-                                🔄 Follow-up Questions
-                            </button>
+                        <div class="p-4 bg-slate-800/50 rounded-lg">
+                            <h4 class="font-semibold mb-2">AI Score:</h4>
+                            <div class="flex items-center space-x-2">
+                                <span id="aiScore" class="text-2xl font-bold"></span>
+                                <span id="scoreText" class="text-lg"></span>
+                            </div>
+                        </div>
+                        <div class="p-4 bg-slate-800/50 rounded-lg">
+                            <h4 class="font-semibold mb-2">Feedback:</h4>
+                            <p id="aiFeedbackText" class="text-gray-300"></p>
+                        </div>
+                        <div class="p-4 bg-slate-800/50 rounded-lg">
+                            <h4 class="font-semibold mb-2">Suggestions:</h4>
+                            <p id="aiSuggestions" class="text-gray-300"></p>
                         </div>
                     </div>
+                    
+                    <div class="flex space-x-4 mt-6">
+                        <button id="nextQuestionBtn" class="btn-success flex-1 py-3 rounded-xl font-semibold">
+                            ➡️ Next Question
+                        </button>
+                        <button id="followUpBtn" class="btn-primary flex-1 py-3 rounded-xl font-semibold">
+                            🔄 Follow-up Questions
+                        </button>
+                    </div>
+                </div>
 
-                    <!-- Study Session Complete -->
-                    <div id="completeSection" class="glass-effect rounded-2xl p-6 fade-in hidden">
-                        <div class="text-center">
-                            <div class="text-6xl mb-4">🎉</div>
-                            <h3 class="text-2xl font-semibold text-white mb-4">Study Session Complete!</h3>
-                            <div class="bg-slate-800/50 rounded-xl p-6 mb-6">
-                                <div class="grid grid-cols-2 gap-4 text-center">
-                                    <div>
-                                        <div class="text-3xl font-bold text-green-400" id="finalScore">0/10</div>
-                                        <div class="text-sm text-gray-400">Final Score</div>
-                                    </div>
-                                    <div>
-                                        <div class="text-3xl font-bold text-blue-400" id="finalAccuracy">0%</div>
-                                        <div class="text-sm text-gray-400">Accuracy</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <button id="newSessionBtn" class="btn-success py-3 px-8 rounded-xl font-semibold text-white">
-                                🚀 Start New Session
-                            </button>
-                        </div>
+                <!-- Study Session Complete -->
+                <div id="studyComplete" class="glass rounded-2xl p-6 hidden">
+                    <h3 class="text-2xl font-bold mb-4 text-center">🎉 Study Session Complete!</h3>
+                    <div class="text-center space-y-4">
+                        <div class="text-6xl">🏆</div>
+                        <div class="text-3xl font-bold" id="finalScore"></div>
+                        <div class="text-lg text-gray-300" id="finalAccuracy"></div>
+                        <p class="text-gray-400">Great job! You've completed your study session.</p>
+                        <button id="newSessionBtn" class="btn-primary px-8 py-3 rounded-xl font-semibold">
+                            🚀 Start New Session
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Notification Container -->
+    <div id="notificationContainer" class="fixed top-4 right-4 z-50 space-y-2"></div>
+
     <script>
-        // Study Session State
+        // Global state
         let studySession = {
             questions: [],
             currentQuestionIndex: 0,
             answers: [],
             scores: [],
             correctAnswers: 0,
-            isRecording: false,
-            recognition: null,
-            mediaRecorder: null,
-            audioChunks: []
+            isActive: false
         };
+        
+        let uploadedFilesData = []; // Fixed: renamed to avoid conflict with DOM element
+        let recognition = null;
+        let isRecording = false;
 
-        // Initialize Speech Recognition
-        function initSpeechRecognition() {
-            if ('webkitSpeechRecognition' in window) {
-                studySession.recognition = new webkitSpeechRecognition();
-            } else if ('SpeechRecognition' in window) {
-                studySession.recognition = new SpeechRecognition();
-            } else {
-                showNotification('Speech recognition not supported. Please use Chrome or Safari.', 'error');
-                return;
-            }
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            createParticles();
+            setupFileUpload();
+            initSpeechRecognition();
+            setupEventListeners();
+        });
 
-            studySession.recognition.continuous = false;
-            studySession.recognition.interimResults = false;
-            studySession.recognition.lang = 'en-US';
-
-            studySession.recognition.onstart = function() {
-                studySession.isRecording = true;
-                updateRecordingUI(true);
-            };
-
-            studySession.recognition.onresult = function(event) {
-                const answer = event.results[0][0].transcript;
-                processAnswer(answer);
-            };
-
-            studySession.recognition.onerror = function(event) {
-                console.error('Speech recognition error:', event.error);
-                studySession.isRecording = false;
-                updateRecordingUI(false);
-                showNotification('Speech recognition error. Please try again.', 'error');
-            };
-
-            studySession.recognition.onend = function() {
-                studySession.isRecording = false;
-                updateRecordingUI(false);
-            };
-        }
-
-        // Create Dynamic Particles
+        // Create dynamic particles
         function createParticles() {
-            const particlesContainer = document.getElementById('particles');
+            const particlesContainer = document.getElementById('particlesContainer');
             const particleCount = 50;
-
+            
             for (let i = 0; i < particleCount; i++) {
                 const particle = document.createElement('div');
                 particle.className = 'particle';
-                
-                const size = Math.random() * 4 + 2;
-                particle.style.width = size + 'px';
-                particle.style.height = size + 'px';
+                particle.style.width = Math.random() * 4 + 2 + 'px';
+                particle.style.height = particle.style.width;
                 particle.style.left = Math.random() * 100 + '%';
                 particle.style.top = Math.random() * 100 + '%';
                 particle.style.animationDelay = Math.random() * 6 + 's';
@@ -409,7 +360,7 @@
         function setupFileUpload() {
             const uploadArea = document.getElementById('uploadArea');
             const fileInput = document.getElementById('fileInput');
-            const uploadedFiles = document.getElementById('uploadedFiles');
+            const uploadedFilesContainer = document.getElementById('uploadedFilesContainer');
             const fileList = document.getElementById('fileList');
             const startStudyBtn = document.getElementById('startStudyBtn');
 
@@ -457,7 +408,10 @@
                         const result = await response.json();
 
                         if (result.success) {
-                            uploadedFiles.classList.remove('hidden');
+                            // Store the uploaded files data
+                            uploadedFilesData = result.files;
+                            
+                            uploadedFilesContainer.classList.remove('hidden');
                             fileList.innerHTML = '';
                             
                             result.files.forEach(file => {
@@ -495,22 +449,35 @@
             button.parentElement.remove();
             const remainingFiles = document.getElementById('fileList').children.length;
             if (remainingFiles === 0) {
-                document.getElementById('uploadedFiles').classList.add('hidden');
+                document.getElementById('uploadedFilesContainer').classList.add('hidden');
                 document.getElementById('startStudyBtn').disabled = true;
+                uploadedFilesData = [];
             }
         }
 
         // Start Study Session with Backend Integration
         async function startStudySession() {
             try {
-                // Generate questions using backend
+                // Get the actual content from uploaded files
+                let content = '';
+                if (uploadedFilesData && uploadedFilesData.length > 0) {
+                    // Combine all file contents
+                    content = uploadedFilesData.map(file => file.content || '').join('\n\n');
+                }
+                
+                if (!content.trim()) {
+                    showNotification('No study material content available. Please upload files first.', 'error');
+                    return;
+                }
+
+                // Generate questions using backend with actual content
                 const response = await fetch('/generate_questions', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        content: 'Study material uploaded by user'
+                        content: content
                     })
                 });
 
@@ -522,6 +489,7 @@
                     studySession.answers = [];
                     studySession.scores = [];
                     studySession.correctAnswers = 0;
+                    studySession.isActive = true;
                     
                     showQuestion();
                     updateProgress();
@@ -535,66 +503,91 @@
             }
         }
 
+        // Show current question
         function showQuestion() {
-            const questionSection = document.getElementById('questionSection');
             const currentQuestion = document.getElementById('currentQuestion');
-            const feedbackSection = document.getElementById('feedbackSection');
-            const completeSection = document.getElementById('completeSection');
+            const questionText = document.getElementById('questionText');
+            const studyProgress = document.getElementById('studyProgress');
             
-            questionSection.classList.remove('hidden');
-            feedbackSection.classList.add('hidden');
-            completeSection.classList.add('hidden');
-            
-            currentQuestion.textContent = studySession.questions[studySession.currentQuestionIndex];
-        }
-
-        function updateRecordingUI(recording) {
-            const recordBtn = document.getElementById('recordAnswerBtn');
-            const answerStatus = document.getElementById('answerStatus');
-            
-            if (recording) {
-                recordBtn.textContent = '🔴 Recording... Release to Stop';
-                recordBtn.classList.add('recording-pulse');
-                answerStatus.classList.remove('hidden');
+            if (studySession.currentQuestionIndex < studySession.questions.length) {
+                questionText.textContent = studySession.questions[studySession.currentQuestionIndex];
+                currentQuestion.classList.remove('hidden');
+                studyProgress.classList.remove('hidden');
             } else {
-                recordBtn.textContent = '🎤 Record Your Answer';
-                recordBtn.classList.remove('recording-pulse');
-                answerStatus.classList.add('hidden');
+                showComplete();
             }
         }
 
-        // Process Answer with Backend Integration
+        // Initialize speech recognition
+        function initSpeechRecognition() {
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                recognition = new SpeechRecognition();
+                recognition.continuous = false;
+                recognition.interimResults = false;
+                recognition.lang = 'en-US';
+
+                recognition.onresult = function(event) {
+                    const transcript = event.results[0][0].transcript;
+                    processAnswer(transcript);
+                };
+
+                recognition.onerror = function(event) {
+                    console.error('Speech recognition error:', event.error);
+                    showNotification('Speech recognition error. Please try again.', 'error');
+                    updateRecordingUI(false);
+                };
+
+                recognition.onend = function() {
+                    updateRecordingUI(false);
+                };
+            } else {
+                showNotification('Speech recognition not supported in this browser.', 'error');
+            }
+        }
+
+        // Update recording UI
+        function updateRecordingUI(recording) {
+            const recordBtn = document.getElementById('recordBtn');
+            const recordingStatus = document.getElementById('recordingStatus');
+            
+            isRecording = recording;
+            
+            if (recording) {
+                recordBtn.textContent = '⏹️ Stop Recording';
+                recordBtn.classList.remove('btn-secondary');
+                recordBtn.classList.add('btn-danger');
+                recordingStatus.classList.remove('hidden');
+            } else {
+                recordBtn.textContent = '🎤 Record Your Answer';
+                recordBtn.classList.remove('btn-danger');
+                recordBtn.classList.add('btn-secondary');
+                recordingStatus.classList.add('hidden');
+            }
+        }
+
+        // Process student answer
         async function processAnswer(answer) {
             try {
+                const question = studySession.questions[studySession.currentQuestionIndex];
+                
+                // Send to backend for AI grading
                 const response = await fetch('/grade_answer', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        question: studySession.questions[studySession.currentQuestionIndex],
-                        answer: answer
+                        question: question,
+                        answer: answer,
+                        content: uploadedFilesData.map(file => file.content || '').join('\n\n')
                     })
                 });
 
                 const result = await response.json();
 
                 if (result.success) {
-                    studySession.answers.push({
-                        question: studySession.questions[studySession.currentQuestionIndex],
-                        answer: answer,
-                        score: result.score,
-                        isCorrect: result.isCorrect
-                    });
-                    
-                    studySession.scores.push(result.score);
-                    
-                    if (result.isCorrect) {
-                        studySession.correctAnswers++;
-                    }
-                    
-                    showFeedback(answer, result.score, result.isCorrect, result.feedback);
-                    updateProgress();
+                    showFeedback(answer, result);
                 } else {
                     showNotification('Error grading answer: ' + result.message, 'error');
                 }
@@ -604,70 +597,75 @@
             }
         }
 
-        function showFeedback(answer, score, isCorrect, feedback) {
-            const questionSection = document.getElementById('questionSection');
-            const feedbackSection = document.getElementById('feedbackSection');
-            const feedbackContent = document.getElementById('feedbackContent');
-            const followUpBtn = document.getElementById('followUpBtn');
-            
-            questionSection.classList.add('hidden');
-            feedbackSection.classList.remove('hidden');
-            
-            const feedbackHTML = `
-                <div class="bg-slate-800/50 rounded-xl p-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <h4 class="text-lg font-semibold text-white">Your Answer:</h4>
-                        <div class="flex items-center space-x-2">
-                            <span class="text-2xl">${isCorrect ? '✅' : '⚠️'}</span>
-                            <span class="text-xl font-bold ${isCorrect ? 'text-green-400' : 'text-yellow-400'}">${score}/10</span>
-                        </div>
-                    </div>
-                    <p class="text-gray-300 mb-4">"${answer}"</p>
-                    <div class="bg-slate-700/50 rounded-lg p-4">
-                        <h5 class="font-semibold text-white mb-2">AI Feedback:</h5>
-                        <p class="text-gray-300">${feedback}</p>
-                    </div>
-                </div>
-            `;
-            
-            feedbackContent.innerHTML = feedbackHTML;
-            
-            if (!isCorrect && score < 7) {
-                followUpBtn.classList.remove('hidden');
+        // Show AI feedback
+        function showFeedback(answer, result) {
+            const aiFeedback = document.getElementById('aiFeedback');
+            const studentAnswer = document.getElementById('studentAnswer');
+            const aiScore = document.getElementById('aiScore');
+            const scoreText = document.getElementById('scoreText');
+            const aiFeedbackText = document.getElementById('aiFeedbackText');
+            const aiSuggestions = document.getElementById('aiSuggestions');
+
+            studentAnswer.textContent = answer;
+            aiScore.textContent = result.score + '/10';
+            scoreText.textContent = result.is_correct ? '✅ Correct!' : '❌ Needs Improvement';
+            aiFeedbackText.textContent = result.feedback;
+            aiSuggestions.textContent = result.suggestions;
+
+            // Update score colors
+            if (result.score >= 8) {
+                aiScore.className = 'text-2xl font-bold text-green-400';
+            } else if (result.score >= 6) {
+                aiScore.className = 'text-2xl font-bold text-yellow-400';
             } else {
-                followUpBtn.classList.add('hidden');
+                aiScore.className = 'text-2xl font-bold text-red-400';
             }
+
+            // Store the answer and score
+            studySession.answers.push(answer);
+            studySession.scores.push(result.score);
+            if (result.is_correct) {
+                studySession.correctAnswers++;
+            }
+
+            aiFeedback.classList.remove('hidden');
+            updateProgress();
         }
 
+        // Next question
         function nextQuestion() {
             studySession.currentQuestionIndex++;
-            
-            if (studySession.currentQuestionIndex >= studySession.questions.length) {
-                showComplete();
-            } else {
-                showQuestion();
-            }
+            document.getElementById('aiFeedback').classList.add('hidden');
+            showQuestion();
         }
 
-        async function showComplete() {
-            const questionSection = document.getElementById('questionSection');
-            const feedbackSection = document.getElementById('feedbackSection');
-            const completeSection = document.getElementById('completeSection');
+        // Show completion screen
+        function showComplete() {
+            const studyComplete = document.getElementById('studyComplete');
             const finalScore = document.getElementById('finalScore');
             const finalAccuracy = document.getElementById('finalAccuracy');
             
-            questionSection.classList.add('hidden');
-            feedbackSection.classList.add('hidden');
-            completeSection.classList.remove('hidden');
-            
-            const accuracy = Math.round((studySession.correctAnswers / studySession.questions.length) * 100);
             const totalScore = studySession.scores.reduce((sum, score) => sum + score, 0);
+            const averageScore = (totalScore / studySession.scores.length).toFixed(1);
+            const accuracy = ((studySession.correctAnswers / studySession.questions.length) * 100).toFixed(1);
             
-            finalScore.textContent = `${totalScore}/${studySession.questions.length * 10}`;
-            finalAccuracy.textContent = `${accuracy}%`;
+            finalScore.textContent = `Final Score: ${averageScore}/10`;
+            finalAccuracy.textContent = `Accuracy: ${accuracy}%`;
+            
+            studyComplete.classList.remove('hidden');
+            document.getElementById('currentQuestion').classList.add('hidden');
+            document.getElementById('studyProgress').classList.add('hidden');
             
             // Save session to backend
+            saveSession();
+        }
+
+        // Save study session
+        async function saveSession() {
             try {
+                const totalScore = studySession.scores.reduce((sum, score) => sum + score, 0);
+                const accuracy = (studySession.correctAnswers / studySession.questions.length) * 100;
+                
                 await fetch('/save_session', {
                     method: 'POST',
                     headers: {
@@ -684,73 +682,72 @@
             } catch (error) {
                 console.error('Error saving session:', error);
             }
-            
-            showNotification('Study session completed! Great job!', 'success');
         }
 
+        // Update progress
         function updateProgress() {
-            const questionsAnswered = document.getElementById('questionsAnswered');
+            const progressText = document.getElementById('progressText');
             const progressBar = document.getElementById('progressBar');
+            const questionsAnswered = document.getElementById('questionsAnswered');
             const correctAnswers = document.getElementById('correctAnswers');
             const accuracy = document.getElementById('accuracy');
             
-            const progress = (studySession.currentQuestionIndex / studySession.questions.length) * 100;
-            const currentAccuracy = studySession.currentQuestionIndex > 0 ? 
-                Math.round((studySession.correctAnswers / studySession.currentQuestionIndex) * 100) : 0;
+            const current = studySession.currentQuestionIndex;
+            const total = studySession.questions.length;
+            const progress = (current / total) * 100;
             
-            questionsAnswered.textContent = `${studySession.currentQuestionIndex}/${studySession.questions.length}`;
+            progressText.textContent = `${current}/${total}`;
             progressBar.style.width = `${progress}%`;
+            questionsAnswered.textContent = current;
             correctAnswers.textContent = studySession.correctAnswers;
-            accuracy.textContent = `${currentAccuracy}%`;
+            accuracy.textContent = total > 0 ? Math.round((studySession.correctAnswers / total) * 100) + '%' : '0%';
         }
 
-        function showNotification(message, type = 'success') {
+        // Setup event listeners
+        function setupEventListeners() {
+            document.getElementById('startStudyBtn').addEventListener('click', startStudySession);
+            document.getElementById('recordBtn').addEventListener('click', toggleRecording);
+            document.getElementById('nextQuestionBtn').addEventListener('click', nextQuestion);
+            document.getElementById('newSessionBtn').addEventListener('click', () => {
+                location.reload();
+            });
+        }
+
+        // Toggle recording
+        function toggleRecording() {
+            if (!recognition) {
+                showNotification('Speech recognition not available.', 'error');
+                return;
+            }
+
+            if (isRecording) {
+                recognition.stop();
+            } else {
+                recognition.start();
+                updateRecordingUI(true);
+            }
+        }
+
+        // Show notification
+        function showNotification(message, type = 'info') {
+            const container = document.getElementById('notificationContainer');
+            const notification = document.createElement('div');
+            
             const colors = {
-                success: 'from-green-600 to-emerald-600',
-                error: 'from-red-600 to-pink-600',
-                info: 'from-blue-600 to-cyan-600'
+                success: 'bg-green-500',
+                error: 'bg-red-500',
+                info: 'bg-blue-500'
             };
             
-            const notification = document.createElement('div');
-            notification.className = `fixed top-4 right-4 bg-gradient-to-r ${colors[type]} text-white px-6 py-3 rounded-lg shadow-2xl z-50 transform translate-x-full transition-transform duration-300`;
+            notification.className = `${colors[type]} text-white px-6 py-3 rounded-lg shadow-lg slide-in`;
             notification.textContent = message;
-            document.body.appendChild(notification);
-
+            
+            container.appendChild(notification);
+            
             setTimeout(() => {
-                notification.classList.remove('translate-x-full');
-            }, 100);
-
-            setTimeout(() => {
-                notification.classList.add('translate-x-full');
-                setTimeout(() => {
-                    document.body.removeChild(notification);
-                }, 300);
-            }, 3000);
+                notification.remove();
+            }, 5000);
         }
-
-        // Event Listeners
-        document.getElementById('startStudyBtn').addEventListener('click', startStudySession);
-        document.getElementById('recordAnswerBtn').addEventListener('mousedown', () => {
-            if (studySession.recognition) {
-                studySession.recognition.start();
-            }
-        });
-        document.getElementById('recordAnswerBtn').addEventListener('mouseup', () => {
-            if (studySession.recognition && studySession.isRecording) {
-                studySession.recognition.stop();
-            }
-        });
-        document.getElementById('nextQuestionBtn').addEventListener('click', nextQuestion);
-        document.getElementById('newSessionBtn').addEventListener('click', () => {
-            location.reload();
-        });
-
-        // Initialize
-        document.addEventListener('DOMContentLoaded', function() {
-            createParticles();
-            setupFileUpload();
-            initSpeechRecognition();
-        });
     </script>
 </body>
 </html>
